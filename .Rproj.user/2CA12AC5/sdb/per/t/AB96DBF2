@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "uiInit <- function(){\n        tagList(\n                initStore(\"store\", \"oydStore\"),\n                tags$script('setInterval(avoidIdle, 5000);\n                            function avoidIdle()\n                            { Shiny.onInputChange(\"myData\", 0) }'\n                ),\n                tags$script(paste0(\n                        # JavaScript to hide initial \"Wait\"-Animation\n                        # 'Shiny.addCustomMessageHandler(\"finishInit\", function(x) {\n                        #         $(\".init-animation\").fadeOut(\"slow\");\n                        # })'\n                        \"$(window).load(function(){\n                        var url = window.location.href;\n                        if(url.indexOf('PIA_URL=') == -1){\n                        if(localStorage['oydStore\\\\\\\\pia_url'] === undefined) {\n                        $('#startConfig').modal('show');\n                        } else {\n                        if(JSON.parse(localStorage['oydStore\\\\\\\\pia_url']).data === null) {\n                        $('#startConfig').modal('show');\n                        }\n                        }\n                        }\n                        $('button:contains(\\\"Close\\\")').html('Schließen');\n                        $('.dropdown-menu').attr('class', 'dropdown-menu pull-right');\n                        $('a').filter(function(index) { return $(this).text() === \\\"\", appTitle, \"\\\"; }).css('display', 'none');\n                        $('a').filter(function(index) { return $(this).text() === \\\"hidden\\\"; }).css('display', 'none');\n                        });\")),\n                tags$script(\n                        'Shiny.addCustomMessageHandler(\"setPiaUrl\", function(x) {\n                                $(\"#returnPIAlink\").attr(\"href\", x);\n                        })'\n                ),\n                tags$script(\n                        'Shiny.addCustomMessageHandler(\"openUrlInNewTab\", function(x) {\n                                var win = window.open(x, \"_blank\");\n                                win.focus();\n                        })'\n                ),\n                tags$script(\n                        'Shiny.addCustomMessageHandler(\"setDisplayButton\", function(x) {\n                                var id = \"#\" + x;\n                                $(\"#buttonVisual\").css(\"background-color\", \"#f5f5f5\");\n                                $(\"#buttonVisual\").css(\"color\", \"black\");\n                                $(\"#buttonSource\").css(\"background-color\", \"#f5f5f5\");\n                                $(\"#buttonSource\").css(\"color\", \"black\");\n                                $(\"#buttonStore\").css(\"background-color\", \"#f5f5f5\");\n                                $(\"#buttonStore\").css(\"color\", \"black\");\n                                $(id).css(\"background-color\", \"#45b79e\");\n                                $(id).css(\"color\", \"white\");\n                        });'\n                ),\n                tags$head(\n                        tags$style(HTML(\".navbar .navbar-nav {float: right}\"))\n                )\n        )\n}\n",
+    "created" : 1492639749374.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1949563215",
+    "id" : "AB96DBF2",
+    "lastKnownWriteTime" : 1492639819,
+    "last_content_update" : 1492639819122,
+    "path" : "~/oyd/oydapp/R/uiInit.R",
+    "project_path" : "R/uiInit.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
