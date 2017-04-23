@@ -1,10 +1,10 @@
 # top-level framework for desktop version
 # last update:2016-10-29
 
-source('uiStart.R')
-source('uiApp.R')
-source('uiMenu.R')
-source('uiFooter.R')
+# source('uiStart.R')
+# source('uiApp.R')
+# source('uiMenu.R')
+# source('uiFooter.R')
 
 uiDesktop <- function(){
         tagList(
@@ -21,7 +21,7 @@ uiDesktop <- function(){
                         collapsible=TRUE,
                         inverse=FALSE,
                         windowTitle=paste0(appTitle, ' | OwnYourData'),
-                        tabPanel(HTML(paste0('hidden', 
+                        tabPanel(HTML(paste0('hidden',
                                              '</a></li>',
                                              '<li><a href="', helpUrl, '"><i class="fa fa-question-circle" aria-hidden="true"></i> Hilfe</a></li>',
                                              '<li><a id="returnPIAlink" href="#">zum Datentresor'))
