@@ -1,12 +1,16 @@
 # config menu in the top-right corner
 # last update:2016-10-06
 
-uiMenu <- function(){
-        tabPanel(HTML(paste0("Version</a></li>",
+uiMenu <- function(ns){
+        tabPanel(
+                # uiOutput(ns('menuList')),
+                HTML(paste0("<div id='versionMenuItem'>Version</div></a></li>",
                              "<li><a href=\"https://github.com/OwnYourData/app-",
                              appName,
-                             "/blob/master/README.md\">Dokumentation</a></li>",
-                             "<li><a href=\"javascript:void(0);\" onclick=\"$('#startConfig').modal('show');\">Konfiguration")),
+                             "/blob/master/README.md\" target=\"_blank\">",
+                             "<div id='documentationMenuItem'>Dokumentation</div></a></li>",
+                             "<li><a href=\"javascript:void(0);\" onclick=\"$('#oyd-startConfig').modal('show');\">",
+                             "<div id='configMenuItem'>Konfiguration</div>")),
                  fluidRow(
                          column(1),
                          column(10,
@@ -44,7 +48,9 @@ uiMenu <- function(){
                  fluidRow(
                          column(1),
                          column(10,
-                                actionButton('backToApp', 'Zurück', style='margin-bottom:20px')),
+                                actionButton(ns('backToApp'),
+                                             uiOutput(ns('ctrlTrnsl_backToAppBtn')),
+                                             style='margin-bottom:20px')),
                          column(1)
                  )
         )

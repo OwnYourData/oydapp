@@ -1,7 +1,7 @@
 # layout for the body of the app
 # last update:2016-10-06
 
-uiApp <- function(){
+uiApp <- function(ns){
         fluidRow(
                 column(1),
                 column(10,
@@ -10,35 +10,32 @@ uiApp <- function(){
                                          style='padding:0',
                                          tags$h3(class='panel-title pull-left',
                                                  tagList(tags$img(src='app_logo.png', style='width: 58px;margin-left: -70px;margin-top: -30px;margin-bottom: -19px'),
-                                                         appTitle),
+                                                         uiOutput(ns('ctrlTrnsl_appTitle'), inline = TRUE)),
                                                  style='font-size:200%;padding:10px 15px;margin-left:30px'),
-                                         tags$button(id='buttonStore', type='button',
-                                                     class='btn btn-default action-button pull-right',
-                                                     style='padding:15px; border:0; border-radius:0; background-color:#f5f5f5',
-                                                     icon('table'), 'Gesammelte Daten'),
-                                         tags$button(id='buttonSource', type='button',
-                                                     class='btn btn-default action-button pull-right',
-                                                     style='padding:15px; border:0; border-radius:0; background-color:#f5f5f5; border-left-color: #45b79e; border-left-width: 1px; border-left-style: solid; border-right-color: #45b79e; border-right-width: 1px; border-right-style: solid',
-                                                     icon('cloud-download'), 'Datenquellen'),
-                                         tags$button(id='buttonVisual', type='button',
-                                                     class='btn btn-default action-button pull-right',
-                                                     style='padding:15px; border:0; border-radius:0; background-color:#45b79e; border-left-color: #45b79e; border-left-width: 1px; border-left-style: solid; color: white',
-                                                     icon('line-chart'), 'Auswertungen'),
+                                         introBox(
+                                                uiOutput(ns('reportBtn')),
+                                                data.step = 2,
+                                                data.intro = 'report Help'),
+                                         introBox(
+                                                uiOutput(ns('sourceBtn')),
+                                                data.step = 1,
+                                                data.intro = 'sources'),
+                                         uiOutput(ns('analysisBtn')),
                                          tags$div(class='clearfix')
 
                                 ),
                                 tags$div(class='panel-body',
                                          conditionalPanel(
-                                                 condition = "output.displayVisual != ''",
-                                                 appStatus()
+                                                 condition = "output['oyd-displayAnalysis'] != ''",
+                                                 uiAnalysis(ns)
                                          ),
                                          conditionalPanel(
-                                                 condition = "output.displaySource != ''",
-                                                 appSource()
+                                                 condition = "output['oyd-displaySource'] != ''",
+                                                 uiSource(ns)
                                          ),
                                          conditionalPanel(
-                                                 condition = "output.displayStore != ''",
-                                                 appStore()
+                                                 condition = "output['oyd-displayReport'] != ''",
+                                                 uiReport(ns)
                                          )
                                 )
                        )

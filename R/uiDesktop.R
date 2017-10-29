@@ -1,44 +1,46 @@
 # top-level framework for desktop version
 # last update:2016-10-29
 
-# source('uiStart.R')
-# source('uiApp.R')
-# source('uiMenu.R')
-# source('uiFooter.R')
+# You can learn more about package authoring with RStudio at:
+#
+#   http://r-pkgs.had.co.nz/
+#
+# Some useful keyboard shortcuts for package authoring:
+#
+#   Build and Reload Package:  'Cmd + Shift + B'
+#   Check Package:             'Cmd + Shift + E'
+#   Test Package:              'Cmd + Shift + T'
 
-uiDesktop <- function(){
+uiDesktop <- function(id){
+        ns <- NS(id)
         tagList(
                 # Code for initial "Wait"-Animation
                 # tags$head(tags$script(src='http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js')),
-                # tags$head(tags$link(rel='stylesheet', type='text/css', href='init_anim.css')),
-                # tags$div(class='init-animation'),
-                uiInit(),
-                uiStart(),
+                tags$head(tags$link(rel='stylesheet', type='text/css', href='init_anim.css')),
+                tags$div(class='init-animation'),
+                uiInit(ns),
+                uiConfigDialog(ns),
                 navbarPage(
-                        uiOutput('hdrImageLinkDesktop'),
-                        id='mainPage',
+                        uiOutput(ns('hdrMyAppsLink')),
+                        id=ns('mainPage'),
                         selected = appName,
+                        position = 'fixed-top',
                         collapsible=TRUE,
                         inverse=FALSE,
-                        windowTitle=paste0(appTitle, ' | OwnYourData'),
+                        fluid=FALSE,
+                        windowTitle=paste0(appTitle,
+                                           ' | OwnYourData'),
                         tabPanel(HTML(paste0('hidden',
                                              '</a></li>',
-                                             '<li><a href="', helpUrl, '"><i class="fa fa-question-circle" aria-hidden="true"></i> Hilfe</a></li>',
-                                             '<li><a id="returnPIAlink" href="#">zum Datentresor'))
-                        ),
+                                             '<li><a id="oyd-help" href="#" class="action-button shiny-bound-input"><i class="fa fa-question-circle" aria-hidden="true"></i> Hilfe'))),
                         tabPanel(appTitle,
                                  value = appName,
-                                 tagList(
-                                         bsAlert('urlStatus'),
-                                         bsAlert('piaStatus'),
-                                         bsAlert('taskInfo')
-                                 ),
-                                 uiApp()
+                                 shinyBS::bsAlert('piaStatus'),
+                                 uiApp(ns)
                         ),
                         navbarMenu(icon('cog'),
-                                   uiMenu()
-                        ),
-                        footer=uiFooter()
+                                   uiMenu(ns)),
+                        footer=uiFooter(ns)
                 )
         )
 }

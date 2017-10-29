@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/oydapp",
-        "query" : "uiStart",
+        "query" : "appStart",
         "regex" : false
     }
 }
