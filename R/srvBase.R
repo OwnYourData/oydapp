@@ -77,16 +77,33 @@ r2d <- function(response){
                                 if ('error' %in% names(retVal)) {
                                         data.frame()
                                 } else {
-                                        if (!is.null(retVal$message)) {
+                                        if ('message' %in% names(retVal)) {
                                                 if (retVal$message ==
                                                     'error.accessDenied') {
                                                         data.frame()
                                                 } else {
                                                         # convert list to data.frame
-                                                        jsonlite::fromJSON(response)
+                                                        tmp <- jsonlite::fromJSON(response)
+                                                        if(typeof(tmp) == 'character'){
+                                                                tmp <- lapply(tmp, jsonlite::fromJSON)
+                                                        }
+                                                        if(typeof(tmp) == 'list'){
+                                                                data.table::rbindlist(tmp, fill=TRUE)
+                                                        } else {
+                                                                tmp
+                                                        }
                                                 }
                                         } else {
-                                                jsonlite::fromJSON(response)
+                                                # convert list to data.frame
+                                                tmp <- jsonlite::fromJSON(response)
+                                                if(typeof(tmp) == 'character'){
+                                                        tmp <- lapply(tmp, jsonlite::fromJSON)
+                                                }
+                                                if(typeof(tmp) == 'list'){
+                                                        data.table::rbindlist(tmp, fill=TRUE)
+                                                } else {
+                                                        tmp
+                                                }
                                         }
                                 }
                         }
@@ -104,15 +121,15 @@ oydDecrypt <- function(app, repo_url, data){
         retVal <- data.frame()
 
         if(length(privateKey) == 1){
-                testJSON <- data[1, 'value']
+                testJSON <- as.character(data[1, 'value'])
                 if(jsonlite::validate(testJSON)){
-                        data$json <- data$value
+                        data$json <- as.character(data$value)
                 } else {
                         errorMsg <- 'msgMissingKey'
                 }
         } else {
                 if(anyNA(data$nonce)){
-                        data$json <- data$value
+                        data$json <- as.character(data$value)
                         warningMsg <- 'msgUnencryptedDataWithKey'
                 } else {
                         authKey <- sodium::pubkey(
@@ -165,8 +182,9 @@ oydDecrypt <- function(app, repo_url, data){
 
 # read raw data from PIA
 readRawItems <- function(app, repo_url) {
+        page_size = 10
         headers <- defaultHeaders(app$token)
-        url_data <- paste0(repo_url, '?size=2000')
+        url_data <- paste0(repo_url, '?size=', page_size)
         header <- RCurl::basicHeaderGatherer()
         doc <- tryCatch(
                 RCurl::getURI(url_data,
@@ -180,29 +198,29 @@ readRawItems <- function(app, repo_url) {
                         recs <- tryCatch(
                                 as.integer(header$value()[['X-Total-Count']]),
                                 error = function(e) { return(0) })
-                        if(recs > 2000) {
-                                page_count <- floor(recs/2000)
-                                shiny::withProgress(message = tr('readDataProgressMsg'),
-                                                    value = 0, {
-                                                            for(page in 0:page_count){
-                                                                    url_data <- paste0(repo_url,
-                                                                                       '?page=', page,
-                                                                                       '&size=2000')
-                                                                    response <- tryCatch(
-                                                                            RCurl::getURL(
-                                                                                    url_data,
-                                                                                    .opts=list(httpheader=headers)),
-                                                                            error=function(e){ return(NA) })
-                                                                    subData <- r2d(response)
-                                                                    if(nrow(respData)>0){
-                                                                            respData <- rbind(respData,
-                                                                                              subData)
-                                                                    } else {
-                                                                            respData <- subData
-                                                                    }
-                                                                    shiny::incProgress(1/page_count)
-                                                            }
-                                                    })
+                        if(recs > page_size) {
+                                page_count <- floor(recs/page_size)
+                                shiny::withProgress(
+                                        value = 0, {
+                                                for(page in 1:(page_count+1)){
+                                                        url_data <- paste0(
+                                                                repo_url,
+                                                                '?page=', page,
+                                                                '&size=', page_size)
+                                                        response <- tryCatch(
+                                                                RCurl::getURL(
+                                                                        url_data,
+                                                                        .opts=list(httpheader=headers)),
+                                                                error=function(e){ return(NA) })
+                                                        subData <- r2d(response)
+                                                        if(nrow(respData)>0){
+                                                                respData <- data.table::rbindlist(list(respData, subData), fill=TRUE)
+                                                        } else {
+                                                                respData <- subData
+                                                        }
+                                                        shiny::incProgress(1/page_count)
+                                                }
+                                })
                         } else {
                                 response <- tryCatch(
                                         RCurl::getURL(
@@ -293,12 +311,14 @@ writeOydItem <- function(app, repo_url, item, id, addFields = list()){
         }
         if(missing(id)){
                 oyd_item <- c(oyd_item, c(created_at = getTsNow()))
+                writeItem(app, repo_url, oyd_item)
         } else {
                 # items <- readItems(app, repo_url)
                 oyd_item <- c(oyd_item, c(id = as.numeric(id),
                                           update_at = getTsNow()))
+                updateItem(app, repo_url, oyd_item, id)
         }
-        writeItem(app, repo_url, oyd_item)
+
 }
 
 # write data into PIA
@@ -306,18 +326,57 @@ writeItem <- function(app, repo_url, item) {
         headers <- defaultHeaders(app$token)
         data <- jsonlite::toJSON(item, auto_unbox = TRUE)
         response <- tryCatch(
-                RCurl::postForm(repo_url,
-                                .opts=list(httpheader = headers,
-                                           postfields = data)),
+                httr::POST(repo_url,
+                           body = data,
+                           encode = 'json',
+                           httr::add_headers(.headers = headers)),
                 error = function(e) {
                         return(e) })
-        if(!is.null(attr(response, "Content-Type"))){
-                response
+        if("status_code" %in% names(response)){
+                if(response$status_code == 200){
+                        httr::content(response)
+                } else {
+                        retVal <- ''
+                        attr(retVal, 'error') <- response$status_code
+                        retVal
+                }
         } else {
                 errrorMessage <- trimws(response$message)
                 response <- ''
                 attr(response, 'error') <- errrorMessage
                 response
+        }
+}
+
+# update record in PIA
+updateItem <- function(app, repo_url, item, id) {
+        headers <- defaultHeaders(app$token)
+        data <- jsonlite::toJSON(item, auto_unbox = TRUE)
+        url <- paste0(repo_url, '/', id)
+        response <- tryCatch(
+                httr::PUT(url,
+                          body = data,
+                          encode = 'json',
+                          httr::add_headers(.headers = headers)),
+                error = function(e) {
+                        return(e) })
+        if("status_code" %in% names(response)){
+                if(response$status_code == 200){
+                        httr::content(response)
+                } else {
+                        retVal <- ''
+                        attr(retVal, 'error') <- response$status_code
+                        retVal
+                }
+        } else {
+                errrorMessage <- tryCatch(
+                        errrorMessage <- trimws(response$message),
+                        error = function(e){
+                                return("no error info")
+                        })
+                retVal <- ''
+                attr(retVal, 'error') <- errrorMessage
+                retVal
         }
 }
 

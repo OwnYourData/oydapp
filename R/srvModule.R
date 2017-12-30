@@ -629,8 +629,8 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 }
                         } else {
                                 keyRecord <- data.frame(
-                                        title = 'Datentresor',
-                                        repo = 'eu.ownyourdata',
+                                        title = appTitle,
+                                        repo = app_id,
                                         key = raw2str(sodium::keygen()),
                                         read = TRUE, stringsAsFactors = FALSE)
                                 session$userData$keyItems <- keyRecord

@@ -3,12 +3,16 @@
 
 srvNotification <- function(input, output, session, tr) {
         readItemsNotification <- function(items) {
-                readError <- attr(items, 'error')
-                if(!is.null(readError)){
+                readError <- as.character(attr(items, 'error'))
+                if(identical(readError, character(0))){
+                        shiny::showNotification(paste0(nrow(items), ' ',
+                                                       tr('msgRecordsRead')))
+                } else {
                         errMsg <- paste0(tr('piaReadError'), ' (',
                                          readError, ')')
                         switch(readError,
-                               "error.accessDenied"={
+                               "error.accessDenied"=,
+                               "403"={
                                        errMsg <- paste0(
                                                tr('piaReadError'), ' (',
                                                tr('piaPermissionReadError'), ')')
@@ -27,9 +31,6 @@ srvNotification <- function(input, output, session, tr) {
                                })
                         shiny::showNotification(errMsg,
                                                 type = 'error')
-                } else {
-                        shiny::showNotification(paste0(nrow(items), ' ',
-                                                       tr('msgRecordsRead')))
                 }
                 readWarning <- attr(items, 'warning')
                 if(!is.null(readWarning)){
@@ -49,26 +50,39 @@ srvNotification <- function(input, output, session, tr) {
         }
 
         writeItemsNotification <- function(items) {
-                writeError <- attr(items, 'error')
-                if(!is.null(writeError)){
+                writeError <- as.character(attr(items, 'error'))
+                if(identical(writeError, character(0))){
+                        shiny::showNotification(paste("1",
+                                                      tr('msg1RecordWrite')))
+                } else {
                         errMsg <- paste0(tr('piaWriteError'), ' (',
                                          writeError, ')')
                         switch(writeError,
-                               "Forbidden"={
+                               "Forbidden"=,
+                               "403"={
                                        errMsg <- paste0(tr('piaWriteError'), ' (',
                                                         tr('piaPermissionWriteError'), ')')
                                })
                         shiny::showNotification(errMsg,
                                                 type = 'error')
+                }
+        }
+
+        updateItemsNotification <- function(items) {
+                updateError <- as.character(attr(items, 'error'))
+                if(identical(updateError, character(0))){
+                        shiny::showNotification(tr('msgRecordUpdate'))
                 } else {
-                        recs <- as.data.frame(jsonlite::fromJSON(items))
-                        if(nrow(recs) == 1){
-                                shiny::showNotification(paste(nrow(recs),
-                                                              tr('msg1RecordWrite')))
-                        } else {
-                                shiny::showNotification(paste(nrow(recs),
-                                                              tr('msgRecordsWrite')))
-                        }
+                        errMsg <- paste0(tr('piaUpdateError'), ' (',
+                                         updateError, ')')
+                        switch(updateError,
+                               "Forbidden"=,
+                               "403"={
+                                       errMsg <- paste0(tr('piaUpdateError'), ' (',
+                                                        tr('piaPermissionWriteError'), ')')
+                               })
+                        shiny::showNotification(errMsg,
+                                                type = 'error')
                 }
         }
 
@@ -76,6 +90,9 @@ srvNotification <- function(input, output, session, tr) {
                 switch(as.character(response),
                        "200"={
                                shiny::showNotification(tr('msgRecordDelete'))
+                       },
+                       "403"={
+                               shiny::showNotification(tr('piaPermissionDeleteError'))
                        },
                        "500"={
                                shiny::showNotification(tr('msgDeleteRecordMissing'),
@@ -90,6 +107,7 @@ srvNotification <- function(input, output, session, tr) {
         return(list(
                 readItemsNotification = readItemsNotification,
                 writeItemsNotification = writeItemsNotification,
+                updateItemsNotification = updateItemsNotification,
                 deleteItemNotification = deleteItemNotification
         ))
 }
