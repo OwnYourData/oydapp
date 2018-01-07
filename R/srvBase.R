@@ -1,5 +1,5 @@
 # basic functions for accessing PIA
-# last update: 2017-09-18
+# last update: 2018-01-07
 
 oydLog <- function(msg)
         cat(paste(Sys.time(), msg, "\n"))
@@ -40,10 +40,32 @@ getToken <- function(pia_url, app_key, app_secret) {
                 return(NA)
         } else {
                 if(jsonlite::validate(response[1])){
-                        return(rjson::fromJSON(response[1])$access_token)
+                        return(jsonlite::fromJSON(response[1])$access_token)
                 } else {
                         return(NA)
                 }
+        }
+}
+
+# public key for encrypted repos or '' if unencrypted
+getRepoPubKey <- function(app, repo){
+        headers <- defaultHeaders(app$token)
+        url_data <- paste0(app$url, '/api/repos/', repo, '/pub_key')
+        header <- RCurl::basicHeaderGatherer()
+        doc <- tryCatch(
+                RCurl::getURI(url_data,
+                              .opts=list(httpheader = headers),
+                              headerfunction = header$update),
+                error = function(e) { return(NA) })
+        if(!is.na(doc)){
+                if(header$value()[['status']] == '200'){
+                        retVal <- jsonlite::fromJSON(doc)
+                        retVal$public_key
+                } else {
+                        ''
+                }
+        } else {
+                ''
         }
 }
 
@@ -70,7 +92,7 @@ r2d <- function(response){
                 data.frame()
         } else {
                 if (nchar(response) > 0) {
-                        retVal <- rjson::fromJSON(response)
+                        retVal <- jsonlite::fromJSON(response)
                         if(length(retVal) == 0) {
                                 data.frame()
                         } else {
@@ -182,7 +204,7 @@ oydDecrypt <- function(app, repo_url, data){
 
 # read raw data from PIA
 readRawItems <- function(app, repo_url) {
-        page_size = 10
+        page_size = 2000
         headers <- defaultHeaders(app$token)
         url_data <- paste0(repo_url, '?size=', page_size)
         header <- RCurl::basicHeaderGatherer()
@@ -200,8 +222,8 @@ readRawItems <- function(app, repo_url) {
                                 error = function(e) { return(0) })
                         if(recs > page_size) {
                                 page_count <- floor(recs/page_size)
-                                shiny::withProgress(
-                                        value = 0, {
+#                                shiny::withProgress(
+#                                        value = 0, {
                                                 for(page in 1:(page_count+1)){
                                                         url_data <- paste0(
                                                                 repo_url,
@@ -218,9 +240,9 @@ readRawItems <- function(app, repo_url) {
                                                         } else {
                                                                 respData <- subData
                                                         }
-                                                        shiny::incProgress(1/page_count)
+#                                                        shiny::incProgress(1/page_count)
                                                 }
-                                })
+#                                })
                         } else {
                                 response <- tryCatch(
                                         RCurl::getURL(
@@ -398,6 +420,6 @@ deleteItem <- function(app, repo_url, id){
 # delete all items in a repo
 deleteRepo <- function(app, repo_url){
         allItems <- readItems(app, repo_url)
-        lapply(allItems$id,
+        tmp <- lapply(allItems$id,
                function(x) deleteItem(app, repo_url, x))
 }

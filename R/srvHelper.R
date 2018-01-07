@@ -83,14 +83,17 @@ getKey <- function(crypt, repo){
         key <- ''
         read <- NA
         if(!is.null(crypt)) {
-                if(nrow(crypt) > 0){
-                        crypt$n <- unlist(lapply(crypt$repo, nchar))
-                        crypt <- crypt[with(crypt, order(-n, repo)), ]
-                        for(i in 1:nrow(crypt)){
-                                if(grepl(paste0('^', crypt[i, 'repo']), repo)){
-                                        key <- crypt[i, 'key']
-                                        read <- crypt[i, 'read']
-                                        break
+                if(crypt != ''){
+                        if(nrow(crypt) > 0){
+                                crypt$n <- unlist(lapply(crypt$repo, nchar))
+                                crypt <- crypt[with(crypt, order(-n, repo)), ]
+                                for(i in 1:nrow(crypt)){
+                                        if(grepl(paste0('^', crypt[i, 'repo']),
+                                                 repo)){
+                                                key <- crypt[i, 'key']
+                                                read <- crypt[i, 'read']
+                                                break
+                                        }
                                 }
                         }
                 }
