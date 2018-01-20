@@ -410,8 +410,12 @@ deleteItem <- function(app, repo_url, id){
                 httr::DELETE(item_url,
                              httr::add_headers(headers)),
                 error = function(e) { return(NA) })
-        if(!is.null(response$status_code)){
-                response$status_code
+        if('status_code' %in% names(response)){
+                if(!is.null(response$status_code)){
+                        response$status_code
+                } else {
+                        'unknown'
+                }
         } else {
                 'unknown'
         }
