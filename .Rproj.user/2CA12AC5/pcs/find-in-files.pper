@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "if (nrow(data) > 0)",
+        "query" : "nrow(data)",
         "regex" : false
     }
 }

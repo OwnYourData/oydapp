@@ -5,6 +5,6 @@ build-last-outputs="[{\"output\":\"==> R CMD INSTALL --no-multiarch --with-keep.
 compile_pdf_state="{\"errors\":[],\"output\":\"\",\"running\":false,\"tab_visible\":false,\"target_file\":\"\"}"
 console_procs="[]"
 files.monitored-path=""
-find-in-files-state="{\"handle\":\"3c8ddbf28552444b80e791cf245d686b\",\"input\":\"if (nrow(data) > 0)\",\"path\":\"~/oyd/base/oydapp\",\"regex\":false,\"results\":{\"file\":[],\"line\":[],\"lineValue\":[],\"matchOff\":[],\"matchOn\":[]},\"running\":false}"
-imageDirtyState="1"
+find-in-files-state="{\"handle\":\"7767a20f7e6444abb6f767c2781d47c2\",\"input\":\"nrow(data)\",\"path\":\"~/oyd/base/oydapp\",\"regex\":false,\"results\":{\"file\":[\"~/oyd/base/oydapp/R/srvBaseReactive.R\",\"~/oyd/base/oydapp/R/srvBaseReactive.R\",\"~/oyd/base/oydapp/R/srvHelper.R\"],\"line\":[95,102,208],\"lineValue\":[\"if(nrow(data) > 0){\",\"if(nrow(data) > 0){\",\"if (nrow(data) > 0) {\"],\"matchOff\":[[13],[13],[14]],\"matchOn\":[[3],[3],[4]]},\"running\":false}"
+imageDirtyState="0"
 saveActionState="0"
