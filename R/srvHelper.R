@@ -204,12 +204,16 @@ iso86012LocalTime <- function(ts){
 # Misc Helpers ============================================
 # create md5 digest from specified fields in data frame
 createDigest <- function(data, fields){
-        if (nrow(data)>0) {
-                data <- tidyr::unite_(data, 'merged',
-                               fields,
-                               remove=FALSE)
-                data$digest <- sapply(data$merged, digest::digest)
-                data[, c(fields,  'digest')]
+        if(length(data) > 0){
+                if (nrow(data) > 0) {
+                        data <- tidyr::unite_(data, 'merged',
+                                       fields,
+                                       remove=FALSE)
+                        data$digest <- sapply(data$merged, digest::digest)
+                        data[, c(fields,  'digest')]
+                } else {
+                        data.frame()
+                }
         } else {
                 data.frame()
         }
