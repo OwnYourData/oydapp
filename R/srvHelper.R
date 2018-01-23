@@ -202,6 +202,19 @@ iso86012LocalTime <- function(ts){
 }
 
 # Misc Helpers ============================================
+# create md5 digest from specified fields in data frame
+createDigest <- function(data, fields){
+        if (nrow(data)>0) {
+                data <- tidyr::unite_(data, 'merged',
+                               fields,
+                               remove=FALSE)
+                data$digest <- sapply(data$merged, digest::digest)
+                data[, c(fields,  'digest')]
+        } else {
+                data.frame()
+        }
+}
+
 # check if a string is a valid email
 validEmail <- function(email){
         emailPtrn <- "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Za-z]{2,4}$"

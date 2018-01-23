@@ -3,8 +3,8 @@
         "caseSensitive" : false,
         "filePatterns" : [
         ],
-        "path" : "~/oyd/oydapp",
-        "query" : "::",
+        "path" : "~/oyd/old/collect",
+        "query" : "createDigest",
         "regex" : false
     }
 }
