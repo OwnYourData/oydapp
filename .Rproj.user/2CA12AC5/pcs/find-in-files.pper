@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "writeOydItem",
+        "query" : "cat(",
         "regex" : false
     }
 }

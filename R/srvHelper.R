@@ -91,8 +91,7 @@ getKey <- function(crypt, repo){
                                                     order(-n, repo)), ]
                                 for(i in 1:nrow(crypt)){
                                         if(grepl(paste0('^',
-                                                        crypt[i,
-                                                              'repo']),
+                                                        crypt[i,'repo']),
                                                  repo)){
                                                 key <- crypt[i, 'key']
                                                 read <- crypt[i, 'read']
@@ -137,23 +136,26 @@ getReadKey <- function(crypt, repo){
 
 checkItemEncryption <- function(data, checkRow = 1){
         if('version' %in% colnames(data)){
-                if(data[checkRow, 'version'] == oydDataVersion){
-                        if('nonce' %in% colnames(data)){
-                                if(nzchar(data[checkRow, 'nonce'])){
-                                        TRUE
+                if(is.na(data[checkRow, 'version'])){
+                        FALSE
+                } else {
+                        if(data[checkRow, 'version'] == oydDataVersion){
+                                if('nonce' %in% colnames(data)){
+                                        if(nzchar(data[checkRow, 'nonce'])){
+                                                TRUE
+                                        } else {
+                                                FALSE
+                                        }
                                 } else {
                                         FALSE
                                 }
                         } else {
                                 FALSE
                         }
-                } else {
-                        FALSE
                 }
         } else {
                 FALSE
         }
-
 }
 
 checkValidKey <- function(app, repo, privateKey, checkRow = 1){

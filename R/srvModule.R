@@ -540,7 +540,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                 content = function(file) {
                         keyRecord <- data.frame(
                                 title = 'Datentresor',
-                                repo = 'eu.ownyourdata',
+                                repo = 'oyd',
                                 key = raw2str(sodium::keygen()),
                                 read = TRUE, stringsAsFactors = FALSE)
                         session$userData$keyItems <- keyRecord
@@ -579,7 +579,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                         if(nzchar(keyStr)){
                                 keyRecord <- data.frame(
                                         title = 'Datentresor',
-                                        repo = 'eu.ownyourdata',
+                                        repo = 'oyd',
                                         key = raw2str(sodium::sha256(
                                                 charToRaw(keyStr))),
                                         read = TRUE, stringsAsFactors = FALSE)
@@ -748,7 +748,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                 if(checkValidKey(app, appRepoDefault, privateKey)){
                         keyRecord <- data.frame(
                                 title = 'Datentresor',
-                                repo = 'eu.ownyourdata',
+                                repo = 'oyd',
                                 key = raw2str(sodium::sha256(
                                         charToRaw(keyStr))),
                                 read = TRUE, stringsAsFactors = FALSE)

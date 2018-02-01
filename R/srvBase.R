@@ -278,10 +278,14 @@ readItems <- function(app, repo_url) {
         respData <- readRawItems(app, repo_url)
         if(nrow(respData) > 0){
                 if('version' %in% colnames(respData)){
-                        if(respData[1, 'version'] == oydDataVersion){
-                                oydDecrypt(app, repo_url, respData)
+                        if(is.na(respData[1, 'version'])){
+                                data.frame()
                         } else {
-                                respData
+                                if(respData[1, 'version'] == oydDataVersion){
+                                        oydDecrypt(app, repo_url, respData)
+                                } else {
+                                        respData
+                                }
                         }
                 } else {
                         respData
