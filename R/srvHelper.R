@@ -158,24 +158,70 @@ checkItemEncryption <- function(data, checkRow = 1){
         }
 }
 
-checkValidKey <- function(app, repo, privateKey, checkRow = 1){
-        url <- itemsUrl(app$url, appRepoDefault)
-        data <- readRawItems(app, url)
-        data0 <- data[checkRow, ]
-        authKey <- sodium::pubkey(sodium::sha256(charToRaw('auth')))
-        if(is.null(data0$value) || is.null(data0$nonce)){
+checkPiaEncryption <- function(app, repo = 'oyd.settings'){
+        if(getRepoPubKey(app, repo) == ''){
                 FALSE
         } else {
-                cipher <- str2raw(as.character(data0$value))
-                nonce <- str2raw(as.character(data0$nonce))
-                value <- tryCatch(
-                        rawToChar(sodium::auth_decrypt(cipher,
-                                                       privateKey,
-                                                       authKey,
-                                                       nonce)),
-                        error = function(e) {
-                                return(NA) })
-                !is.na(value)
+                TRUE
+        }
+}
+
+checkValidKey <- function(app, repo, privateKey){
+        publicKey <- getRepoPubKey(app, repo)
+        if(publicKey == ''){
+                FALSE
+        } else {
+                if(all(str2raw(publicKey) == sodium::pubkey(privateKey))){
+                        TRUE
+                } else {
+                        FALSE
+                }
+        }
+}
+
+encryptedKeyInfo <- function(keyInfo){
+        inputJSON <- tryCatch(
+                as.data.frame(jsonlite::fromJSON(keyInfo)),
+                error = function(e) { return(data.frame()) })
+        if(nrow(inputJSON) == 0){
+                FALSE
+        } else {
+                if((nrow(inputJSON) == 1) &
+                   (all(c('cipher','nonce') %in% colnames(inputJSON)))){
+                        TRUE
+                } else {
+                        FALSE
+                }
+        }
+}
+
+validKeyInfo <- function(keyInfo){
+        inputJSON <- tryCatch(
+                as.data.frame(jsonlite::fromJSON(keyInfo)),
+                error = function(e) { return(data.frame()) })
+        if(nrow(inputJSON) == 0){
+                FALSE
+        } else {
+                if(all(c('title', 'repo', 'key', 'read') %in% colnames(inputJSON))){
+                        TRUE
+                } else {
+                        FALSE
+                }
+        }
+}
+
+parseKeyInfo <- function(keyInfo){
+        inputJSON <- tryCatch(
+                as.data.frame(jsonlite::fromJSON(keyInfo)),
+                error = function(e) { return(data.frame()) })
+        if(nrow(inputJSON) == 0){
+                data.frame()
+        } else {
+                if(all(c('title', 'repo', 'key', 'read') %in% colnames(inputJSON))){
+                        inputJSON
+                } else {
+                        data.frame()
+                }
         }
 }
 

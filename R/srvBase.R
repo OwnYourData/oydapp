@@ -47,6 +47,27 @@ getToken <- function(pia_url, app_key, app_secret) {
         }
 }
 
+getPluginId <- function(app){
+        headers <- defaultHeaders(app$token)
+        plugins_url <- paste0(app$url, '/api/plugins/index')
+        header <- RCurl::basicHeaderGatherer()
+        response <- tryCatch(
+                        RCurl::getURI(plugins_url,
+                                      .opts=list(httpheader = headers),
+                                      headerfunction = header$update),
+                        error = function(e) { return(NA) })
+        if(!is.na(response)){
+                if(header$value()[['status']] == '200'){
+                        plugins <- as.data.frame(jsonlite::fromJSON(response))
+                        plugins[plugins$uid == app$app_key, 'id']
+                } else {
+                        ''
+                }
+        } else {
+                ''
+        }
+}
+
 # public key for encrypted repos or '' if unencrypted
 getRepoPubKey <- function(app, repo){
         headers <- defaultHeaders(app$token)
@@ -404,6 +425,24 @@ updateItem <- function(app, repo_url, item, id) {
                 attr(retVal, 'error') <- errrorMessage
                 retVal
         }
+}
+
+createTask <- function(app, identifier, command, schedule){
+        headers <- defaultHeaders(app$token)
+        task_url <- paste0(app$url, '/api/tasks/create')
+        item <- list(identifier = identifier,
+                     command    = jsonlite::base64_enc(command),
+                     schedule   = schedule)
+        data <- jsonlite::toJSON(item, auto_unbox = TRUE)
+
+        response <- tryCatch(
+                httr::POST(task_url,
+                           body = data,
+                           encode = 'json',
+                           httr::add_headers(.headers = headers)),
+                error = function(e) {
+                        return(e) })
+
 }
 
 # delete data in PIA

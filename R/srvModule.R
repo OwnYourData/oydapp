@@ -57,7 +57,6 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 if(is.null(input$store$pia_url) |
                                    is.null(input$store$app_key) |
                                    is.null(input$store$app_secret)){
-
                                 } else {
                                         if((input$store$pia_url == urlParams[['PIA_URL']]) &
                                            (input$store$app_key == urlParams[['APP_KEY']]) &
@@ -112,7 +111,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                         if(encryptedKeyInfo(keyInfo)){
                                                 # yes (keyInfo in local storage is encrypted)
                                                 session$userData$openDialog <- 'decryptConfigDialog'
-                                                shiny::showModal(decryptConfigDialog())
+                                                shiny::showModal(decryptDialog())
                                         } else {
                                                 # no (keyInfo in local storage is either unencrypted or invalid)
                                                 # check if keyInfo contains valid keys
@@ -150,8 +149,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                         # available data in PIA for current app?
                                         if(nrow(retVal) > 0){
                                                 # yes (there is data)
-                                                # check if data is encrypted
-                                                if(checkItemEncryption(retVal)){
+                                                if(checkPiaEncryption(app)){
                                                         # yes (data is encrypted)
                                                         session$userData$openDialog <- 'decryptDialog'
                                                         shiny::showModal(decryptDialog())
@@ -402,53 +400,6 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
         observeEvent(input$p4close, {
                 shinyBS::toggleModal(session, 'startConfig', toggle = "toggle")
         })
-
-        # Key Handling ====================================
-        encryptedKeyInfo <- function(keyInfo){
-                inputJSON <- tryCatch(
-                        as.data.frame(jsonlite::fromJSON(keyInfo)),
-                        error = function(e) { return(data.frame()) })
-                if(nrow(inputJSON) == 0){
-                        FALSE
-                } else {
-                        if((nrow(inputJSON) == 1) &
-                           (all(c('cipher','nonce') %in% colnames(inputJSON)))){
-                                TRUE
-                        } else {
-                                FALSE
-                        }
-                }
-        }
-
-        validKeyInfo <- function(keyInfo){
-                inputJSON <- tryCatch(
-                        as.data.frame(jsonlite::fromJSON(keyInfo)),
-                        error = function(e) { return(data.frame()) })
-                if(nrow(inputJSON) == 0){
-                        FALSE
-                } else {
-                        if(all(c('title', 'repo', 'key', 'read') %in% colnames(inputJSON))){
-                                TRUE
-                        } else {
-                                FALSE
-                        }
-                }
-        }
-
-        parseKeyInfo <- function(keyInfo){
-                inputJSON <- tryCatch(
-                        as.data.frame(jsonlite::fromJSON(keyInfo)),
-                        error = function(e) { return(data.frame()) })
-                if(nrow(inputJSON) == 0){
-                        data.frame()
-                } else {
-                        if(all(c('title', 'repo', 'key', 'read') %in% colnames(inputJSON))){
-                                inputJSON
-                        } else {
-                                data.frame()
-                        }
-                }
-        }
 
         observeEvent(input$userLang, {
                 ns <- session$ns
