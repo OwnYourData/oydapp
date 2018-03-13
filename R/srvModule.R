@@ -145,7 +145,6 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                                 }
                                         }
                                 } else {
-                                        oydLog("as expected")
                                         # no (local storage has no keyInfo)
                                         # available data in PIA for current app?
                                         if(nrow(retVal) > 0){
@@ -702,7 +701,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                         keyRecord <- data.frame(
                                 title = 'Datentresor',
                                 repo = 'oyd',
-                                key = raw2str(privateKeyRaw),
+                                key = privateKey,
                                 read = TRUE, stringsAsFactors = FALSE)
                         session$userData$keyItems <- keyRecord
                         keyList()

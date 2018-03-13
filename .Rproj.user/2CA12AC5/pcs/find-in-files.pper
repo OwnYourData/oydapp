@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "msgDecrypt",
+        "query" : "session$userData$keyItems",
         "regex" : false
     }
 }
