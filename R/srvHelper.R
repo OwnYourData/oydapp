@@ -225,6 +225,24 @@ parseKeyInfo <- function(keyInfo){
         }
 }
 
+msgDecrypt <- function(input, key){
+        cipherHex <- jsonlite::fromJSON(input)$value
+        nonceHex <- jsonlite::fromJSON(input)$nonce
+        private_key <- sodium::sha256(charToRaw(key))
+        auth_private_key <- sodium::sha256(charToRaw('auth'))
+        auth_key <- sodium::pubkey(auth_private_key)
+        nonce <- as.raw(strtoi(sapply(
+                seq(1, nchar(nonceHex), by=2),
+                function(x) substr(nonceHex, x, x+1)), 16L))
+        cipher <- as.raw(strtoi(sapply(
+                seq(1, nchar(cipherHex), by=2),
+                function(x) substr(cipherHex, x, x+1)), 16L))
+        tryCatch(rawToChar(
+                sodium::auth_decrypt(cipher, private_key, auth_key, nonce)),
+                error = function(e) {
+                        return('') })
+}
+
 # Time handling functions =================================
 getTsNow <- function(){
         DateTime2iso8601(Sys.time())

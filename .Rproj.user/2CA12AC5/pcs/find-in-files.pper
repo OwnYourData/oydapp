@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "save(",
+        "query" : "msgDecrypt",
         "regex" : false
     }
 }

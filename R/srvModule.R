@@ -145,6 +145,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                                 }
                                         }
                                 } else {
+                                        oydLog("as expected")
                                         # no (local storage has no keyInfo)
                                         # available data in PIA for current app?
                                         if(nrow(retVal) > 0){
@@ -691,17 +692,17 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
 
         observeEvent(input$decryptBtn, {
                 keyStr <- input$masterKey
-                privateKey <- sodium::sha256(charToRaw(keyStr))
                 app <- setupApp(session$userData$piaUrl,
                                 session$userData$appKey,
                                 session$userData$appSecret,
-                                session$userData$keyItems)
-                if(checkValidKey(app, appRepoDefault, privateKey)){
+                                '')
+                privateKey <- getPrivatekey(app, keyStr)
+                privateKeyRaw <- sodium::sha256(charToRaw(privateKey))
+                if(checkValidKey(app, appRepoDefault, privateKeyRaw)){
                         keyRecord <- data.frame(
                                 title = 'Datentresor',
                                 repo = 'oyd',
-                                key = raw2str(sodium::sha256(
-                                        charToRaw(keyStr))),
+                                key = raw2str(privateKeyRaw),
                                 read = TRUE, stringsAsFactors = FALSE)
                         session$userData$keyItems <- keyRecord
                         keyList()

@@ -90,6 +90,29 @@ getRepoPubKey <- function(app, repo){
         }
 }
 
+# private key for encryption
+getPrivatekey <- function(app, pwd){
+        headers <- defaultHeaders(app$token)
+        user_url <- paste0(app$url, '/api/users/current')
+        header <- RCurl::basicHeaderGatherer()
+        doc <- tryCatch(
+                RCurl::getURI(user_url,
+                              .opts=list(httpheader = headers),
+                              headerfunction = header$update),
+                error = function(e) { return(NA) })
+        if(!is.na(doc)){
+                if(header$value()[['status']] == '200'){
+                        retVal <- jsonlite::fromJSON(doc)
+                        message <- retVal$password_key
+                        msgDecrypt(message, pwd)
+                } else {
+                        ''
+                }
+        } else {
+                ''
+        }
+}
+
 # vector with all plugin (app) infos to access PIA
 setupApp <- function(pia_url, app_key, app_secret, keyItems) {
         app_token <- getToken(pia_url,
