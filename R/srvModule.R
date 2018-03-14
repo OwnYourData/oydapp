@@ -147,7 +147,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 } else {
                                         # no (local storage has no keyInfo)
                                         # available data in PIA for current app?
-                                        if(nrow(retVal) > 0){
+                                        # if(nrow(retVal) > 0){
                                                 # yes (there is data)
                                                 if(checkPiaEncryption(app)){
                                                         # yes (data is encrypted)
@@ -162,11 +162,11 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                                         rv$v <- rv$v + 1
                                                         appStart()
                                                 }
-                                        } else {
-                                                # no (no data available yet)
-                                                session$userData$openDialog <- 'encryptDialog'
-                                                shiny::showModal(encryptDialog())
-                                        }
+                                        # } else {
+                                        #         # no (no data available yet)
+                                        #         session$userData$openDialog <- 'encryptDialog'
+                                        #         shiny::showModal(encryptDialog())
+                                        # }
 
                                 }
                         } else {
@@ -197,6 +197,10 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
         })
 
         # Config Dialog =======================
+        shiny::observeEvent(input$uiSimpleShowConfig, {
+                shinyBS::toggleModal(session, 'startConfig', toggle = "open")
+        })
+
         shiny::observeEvent(input$startConfig, {
                 typeOptions <- c(1:2)
                 names(typeOptions) <- c(

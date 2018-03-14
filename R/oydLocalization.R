@@ -32,6 +32,9 @@ oydLocalization <- list(
         'ctrlTrnsl_backToAppBtn' = list('de' = 'Zurück', 'en' = 'Back'),
         'readDataProgressMsg' = list('de' = 'lese Daten', 'en' = 'read data'),
 
+        # simple UI
+        'ctrlTrnsl_createdBy' = list('de' = 'entwickelt von', 'en' = 'created by'),
+
         # Start Config Dialog
         'ctrlTrnsl_configDialogTitle' = list('de' = 'Konfiguration', 'en' = 'Configuration'),
         'ctrlTrnsl_configDialogStep1' = list('de' = 'Willkommen (Schritt 1 von 4)', 'en' = 'Welcome (Step 1 of 4)'),

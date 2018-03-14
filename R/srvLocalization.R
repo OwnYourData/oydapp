@@ -1,10 +1,11 @@
 srvLocalization <- function(input, output, session) {
         allLocalization <- append(oydLocalization, localization)
         tr <- function(text, lang = ''){
-                lang <- 'en'
                 if(lang == '') {
                         if(!is.null(input$lang)){
                                 lang <- input$lang
+                        } else {
+                                lang <- 'en'
                         }
                 }
                 sapply(text,
