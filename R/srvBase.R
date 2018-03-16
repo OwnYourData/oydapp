@@ -225,8 +225,8 @@ oydDecrypt <- function(app, repo_url, data){
                 parseError <- FALSE
                 retVal <- tryCatch(
                         do.call(rbind.data.frame,
-                                lapply(data$json,
-                                       function(x) jsonlite::fromJSON(x))),
+                                lapply(lapply(data$json, jsonlite::fromJSON),
+                                       function(x) t(unlist(x)))),
                         error = function(e) {
                                 parseError <<- TRUE
                                 return(data.frame()) })
