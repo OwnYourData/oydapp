@@ -1,5 +1,9 @@
 uiSimple <- function(id){
         ns <- NS(id)
+        shiny::addResourcePath(
+                prefix = 'img',
+                directoryPath = system.file('img',
+                                            package='oydapp'))
         tagList(
                 # Code for initial "Wait"-Animation
                 # tags$head(tags$script(src='http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js')),
@@ -47,7 +51,7 @@ uiSimple <- function(id){
                 fluidPage(
                         id=ns('mainPage'),
                         title=paste0(appTitle, ' | OwnYourData'),
-                        titlePanel(span(uiOutput(ns('ctrlTrnsl_appTitle'), inline = TRUE),
+                        titlePanel(span(tags$img(src='img/oydapp.png', style='width: 40px;'),
                                    span(
                                            actionLink(ns('uiSimpleShowConfig'),
                                                       '', icon = icon("cog")),
@@ -55,7 +59,8 @@ uiSimple <- function(id){
                         shinyBS::bsAlert('piaStatus'),
                         uiBody(ns),
                         hr(),
-                        span(span(tagList(uiOutput(ns('ctrlTrnsl_createdBy'), inline = TRUE),
+                        span(span(tagList(span(uiOutput(ns('ctrlTrnsl_createdBy'), inline = TRUE),
+                                               class = 'hidden-xs'),
                                   a("OwnYourData.eu", href='https://www.ownyourdata.eu')),
                                   style="float:right;"),
                              div(style='display:flex; width:200px; margin-top:-8px;',

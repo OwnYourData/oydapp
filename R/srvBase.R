@@ -204,9 +204,9 @@ oydDecrypt <- function(app, repo_url, data){
                         data$json <- tryCatch(
                                 apply(data, 1, function(x) {
                                         cipher <- str2raw(as.character(
-                                                x['value']))
+                                                x[1, 'value']))
                                         nonce <- str2raw(as.character(
-                                                x['nonce']))
+                                                x[1, 'nonce']))
                                         rawToChar(sodium::auth_decrypt(
                                                 cipher,
                                                 privateKey,

@@ -1,5 +1,5 @@
 {
-    "path" : "~/oyd/services/service-report/docker/srv-report_map",
+    "path" : "~/oyd/base/oydapp",
     "sortOrder" : [
         {
             "ascending" : true,
