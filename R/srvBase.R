@@ -204,18 +204,27 @@ oydDecrypt <- function(app, repo_url, data){
                         data$json <- tryCatch(
                                 apply(data, 1, function(x) {
                                         cipher <- str2raw(as.character(
-                                                x[1, 'value']))
+                                                x['value']))
                                         nonce <- str2raw(as.character(
-                                                x[1, 'nonce']))
-                                        rawToChar(sodium::auth_decrypt(
-                                                cipher,
-                                                privateKey,
-                                                authKey,
-                                                nonce))
+                                                x['nonce']))
+                                        tryCatch(
+                                                rawToChar(sodium::auth_decrypt(
+                                                        cipher,
+                                                        privateKey,
+                                                        authKey,
+                                                        nonce)),
+                                                error = function(e) {
+                                                        return('oyd_error')
+                                                })
                                 }),
                                 error = function(e) {
                                         decryptError <<- TRUE
                                         return(NA) })
+                        data <- tryCatch(
+                                data[data$json != 'oyd_error', ],
+                                error = function(e) {
+                                        return(data.frame())
+                                })
                         if(decryptError){
                                 errorMsg <- 'msgDecryptError'
                         }

@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "ajax",
+        "query" : "ctrlTrnsl_langLabel",
         "regex" : false
     }
 }
