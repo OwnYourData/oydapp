@@ -51,23 +51,25 @@ uiSimple <- function(id){
                 fluidPage(
                         id=ns('mainPage'),
                         title=paste0(appTitle, ' | OwnYourData'),
-                        titlePanel(span(tags$img(src='img/oydapp.png', style='width: 40px;'),
+                        titlePanel(fluidRow(column(1),column(10,
+                                span(tags$img(src='img/oydapp.png', style='width: 40px;'),
                                    span(
                                            actionLink(ns('uiSimpleShowConfig'),
                                                       '', icon = icon("cog")),
-                                           style="float:right;"))),
+                                           style="float:right;"))))),
                         shinyBS::bsAlert('piaStatus'),
                         uiBody(ns),
+                        fluidRow(column(1),column(10,
                         hr(),
-                        span(span(tagList(span(uiOutput(ns('ctrlTrnsl_createdBy'), inline = TRUE),
-                                               class = 'hidden-xs'),
-                                  a("OwnYourData.eu", href='https://www.ownyourdata.eu')),
+                        span(span(div(style='display:flex; width:200px; margin-top:-8px;',
+                                      div(style='margin:8px;', uiOutput(ns('ctrlTrnsl_langLabel'))),
+                                      selectInput(ns('lang'), label = NULL, width = '160px',
+                                                  choices = list("Deutsch" = 'de', "English" = 'en'),
+                                                  selected = 'de')),
                                   style="float:right;"),
-                             div(style='display:flex; width:200px; margin-top:-8px;',
-                                 div(style='margin:8px;', uiOutput(ns('ctrlTrnsl_langLabel'))),
-                                 selectInput(ns('lang'), label = NULL, width = '160px',
-                                             choices = list("Deutsch" = 'de', "English" = 'en'),
-                                             selected = 'de')))
+                             span(tagList(span(uiOutput(ns('ctrlTrnsl_createdBy'), inline = TRUE),
+                                               class = 'hidden-xs'),
+                                          a("OwnYourData.eu", href='https://www.ownyourdata.eu'))))))
                 )
         )
 }

@@ -89,9 +89,9 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 output$currentToken <- renderUI({
                                         HTML(paste0('<strong>',
                                                     tr('configDialogStep2currentTokenLbl'),
-                                                    '</strong><br>',
+                                                    '</strong><br><span style="word-break: break-word;">',
                                                     app$token,
-                                                    '<br><br>'))
+                                                    '</span><br><br>'))
                                 })
                                 session$sendCustomMessage(
                                         type='setPiaUrl',
