@@ -108,8 +108,6 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 # key management
                                 # check if keyInfo is available in local storage
                                 keyInfo <- input$store$oyd_keys
-                                save(keyInfo, file='tmp.RData')
-                                oydLog(paste("KeyInfos:", keyInfo))
                                 if(is.null(keyInfo)){
                                         keyInfo <- ''
                                 }
@@ -117,14 +115,12 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                         # yes (local storage has keyInfo)
                                         # check if keyInfo is encrypted
                                         oyd_secret <- Sys.getenv("OYD_SECRET")
-                                        oydLog(paste("Secret:", oyd_secret))
                                         encrypted <- FALSE
                                         if(encryptedKeyInfo(keyInfo)){
                                                 # yes (keyInfo in local storage is encrypted)
                                                 # session$userData$openDialog <- 'decryptConfigDialog'
                                                 # shiny::showModal(decryptDialog())
                                                 keyInfo <- msgDecrypt(keyInfo, oyd_secret)
-                                                oydLog(paste("key-info:", keyInfo))
                                                 encrypted <- TRUE
                                         }
                                         # check if keyInfo contains valid keys
