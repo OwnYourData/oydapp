@@ -57,11 +57,17 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 if(is.null(input$store$pia_url) |
                                    is.null(input$store$app_key) |
                                    is.null(input$store$app_secret)){
+                                        shinyStore::updateStore(session, "pia_url",
+                                                                session$userData$piaUrl)
+                                        shinyStore::updateStore(session, "app_key",
+                                                                session$userData$appKey)
+                                        shinyStore::updateStore(session, "app_secret",
+                                                                session$userData$appSecret)
+                                        shiny::showNotification(tr('msgNewConnectionData'))
                                 } else {
                                         if((input$store$pia_url == urlParams[['PIA_URL']]) &
                                            (input$store$app_key == urlParams[['APP_KEY']]) &
                                            (input$store$app_secret == urlParams[['APP_SECRET']])){
-
                                         } else {
                                                 shinyStore::updateStore(session, "pia_url",
                                                                         session$userData$piaUrl)
@@ -102,47 +108,55 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 # key management
                                 # check if keyInfo is available in local storage
                                 keyInfo <- input$store$oyd_keys
+                                save(keyInfo, file='tmp.RData')
+                                oydLog(paste("KeyInfos:", keyInfo))
                                 if(is.null(keyInfo)){
                                         keyInfo <- ''
                                 }
                                 if(nzchar(keyInfo)){
                                         # yes (local storage has keyInfo)
                                         # check if keyInfo is encrypted
+                                        oyd_secret <- Sys.getenv("OYD_SECRET")
+                                        oydLog(paste("Secret:", oyd_secret))
+                                        encrypted <- FALSE
                                         if(encryptedKeyInfo(keyInfo)){
                                                 # yes (keyInfo in local storage is encrypted)
-                                                session$userData$openDialog <- 'decryptConfigDialog'
-                                                shiny::showModal(decryptDialog())
-                                        } else {
-                                                # no (keyInfo in local storage is either unencrypted or invalid)
-                                                # check if keyInfo contains valid keys
-                                                if(validKeyInfo(keyInfo)){
-                                                        # yes (keyInfo has valid keys)
-                                                        session$userData$keyItems <- parseKeyInfo(keyInfo)
-                                                        shiny::showNotification(
-                                                                paste(nrow(session$userData$keyItems),
-                                                                      tr('msgKeyImport')))
+                                                # session$userData$openDialog <- 'decryptConfigDialog'
+                                                # shiny::showModal(decryptDialog())
+                                                keyInfo <- msgDecrypt(keyInfo, oyd_secret)
+                                                oydLog(paste("key-info:", keyInfo))
+                                                encrypted <- TRUE
+                                        }
+                                        # check if keyInfo contains valid keys
+                                        if(validKeyInfo(keyInfo)){
+                                                # yes (keyInfo has valid keys)
+                                                session$userData$keyItems <- parseKeyInfo(keyInfo)
+                                                shiny::showNotification(
+                                                        paste(nrow(session$userData$keyItems),
+                                                              tr('msgKeyImport')))
+                                                if(!encrypted){
                                                         shiny::showNotification(
                                                                 tr('msgUnencryptedKeyInfo'),
                                                                 type = 'warning')
-                                                        keyList()
-                                                        rv$v <- rv$v + 1
-                                                        appStart()
-                                                } else {
-                                                        # no (keyInfo is corrupt or no data at all)
-                                                        session$userData$keyItems <- data.frame()
-                                                        # available data in PIA for current app?
-                                                        if(nrow(retVal) > 0){
-                                                                shinyBS::createAlert(
-                                                                        session, 'piaStatus',
-                                                                        alertId = 'alertPiaStatus',
-                                                                        style = 'warning', append = FALSE,
-                                                                        title = tr('piaEncryptedDataCorruptKeyInfoTitle'),
-                                                                        content = tr('piaEncryptedDataCorruptKeyInfoMsg'))
-                                                        }
-                                                        keyList()
-                                                        rv$v <- rv$v + 1
-                                                        appStart()
                                                 }
+                                                keyList()
+                                                rv$v <- rv$v + 1
+                                                appStart()
+                                        } else {
+                                                # no (keyInfo is corrupt or no data at all)
+                                                session$userData$keyItems <- data.frame()
+                                                # available data in PIA for current app?
+                                                if(nrow(retVal) > 0){
+                                                        shinyBS::createAlert(
+                                                                session, 'piaStatus',
+                                                                alertId = 'alertPiaStatus',
+                                                                style = 'warning', append = FALSE,
+                                                                title = tr('piaEncryptedDataCorruptKeyInfoTitle'),
+                                                                content = tr('piaEncryptedDataCorruptKeyInfoMsg'))
+                                                }
+                                                keyList()
+                                                rv$v <- rv$v + 1
+                                                appStart()
                                         }
                                 } else {
                                         # no (local storage has no keyInfo)
@@ -169,6 +183,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                         # }
 
                                 }
+                                rv$u <- rv$u + 1
                         } else {
                                 shinyBS::createAlert(
                                         session, 'piaStatus',
@@ -661,7 +676,11 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                         shiny::fluidRow(column(12,
                                                shiny::passwordInput(
                                                        ns('masterKey'),
-                                                       tr('keyLbl', lang = lang)))),
+                                                       tr('keyLbl', lang = lang)),
+                                               shiny::checkboxInput(
+                                                       ns('rememberPassword'),
+                                                       tr('rememberPwdLbl', lang = lang))
+                                               )),
                         if (failed)
                                 shiny::div(shiny::tags$b(
                                         errorMsg,
@@ -708,11 +727,36 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 key = privateKey,
                                 read = TRUE, stringsAsFactors = FALSE)
                         session$userData$keyItems <- keyRecord
+                        if (input$rememberPassword){
+                                store_keys <- as.character(jsonlite::toJSON(as.list(keyRecord[1,]), auto_unbox = TRUE))
+                                if (nchar(Sys.getenv("OYD_SECRET")) > 0){
+                                        oyd_secret <- Sys.getenv("OYD_SECRET")
+                                        privateKey <- sodium::sha256(charToRaw(oyd_secret))
+                                        publicKey  <- sodium::pubkey(privateKey)
+                                        authKey <- sodium::sha256(charToRaw('auth'))
+                                        nonce   <- sodium::random(24)
+                                        cipher  <- sodium::auth_encrypt(charToRaw(store_keys),
+                                                                        authKey,
+                                                                        publicKey,
+                                                                        nonce)
+                                        cipher   <- paste0(as.hexmode(as.integer(cipher)),
+                                                          collapse = '')
+                                        nonce   <- paste0(as.hexmode(as.integer(nonce)),
+                                                          collapse = '')
+                                        store_keys <- as.character(
+                                                jsonlite::toJSON(list(
+                                                value=cipher, nonce=nonce),
+                                                auto_unbox = TRUE))
+                                }
+                                shinyStore::updateStore(session, "oyd_keys",
+                                                        store_keys)
+                        }
                         keyList()
                         # re-trigger currApp (necessary for create/update/delete)
                         rv$v <- rv$v + 1
                         appStart()
                         removeModal()
+                        rv$u <- rv$u + 1
                         session$userData$openDialog <- ''
                 } else {
                         session$userData$openDialog <- 'decryptDialog'

@@ -1,7 +1,7 @@
 # helper functions for OYD apps
 # last update: 2017-09-18
 
-rv <- shiny::reactiveValues(v = 0)
+rv <- shiny::reactiveValues(v = 0, u = 0)
 
 # UI Helpers ==============================================
 withBusyIndicatorUI <- function(button) {
@@ -190,7 +190,12 @@ encryptedKeyInfo <- function(keyInfo){
                    (all(c('cipher','nonce') %in% colnames(inputJSON)))){
                         TRUE
                 } else {
-                        FALSE
+                        if((nrow(inputJSON) == 1) &
+                           (all(c('value','nonce') %in% colnames(inputJSON)))){
+                                TRUE
+                        } else {
+                                FALSE
+                        }
                 }
         }
 }
