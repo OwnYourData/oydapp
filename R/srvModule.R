@@ -124,7 +124,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                                 encrypted <- TRUE
                                         }
                                         # check if keyInfo contains valid keys
-                                        if(validKeyInfo(keyInfo)){
+                                        if(validKeyInfo(keyInfo, app, appRepoDefault)){
                                                 # yes (keyInfo has valid keys)
                                                 session$userData$keyItems <- parseKeyInfo(keyInfo)
                                                 shiny::showNotification(
@@ -143,12 +143,14 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                                 session$userData$keyItems <- data.frame()
                                                 # available data in PIA for current app?
                                                 if(nrow(retVal) > 0){
-                                                        shinyBS::createAlert(
-                                                                session, 'piaStatus',
-                                                                alertId = 'alertPiaStatus',
-                                                                style = 'warning', append = FALSE,
-                                                                title = tr('piaEncryptedDataCorruptKeyInfoTitle'),
-                                                                content = tr('piaEncryptedDataCorruptKeyInfoMsg'))
+                                                        session$userData$openDialog <- 'decryptDialog'
+                                                        shiny::showModal(decryptDialog())
+                                                        # shinyBS::createAlert(
+                                                        #         session, 'piaStatus',
+                                                        #         alertId = 'alertPiaStatus',
+                                                        #         style = 'warning', append = FALSE,
+                                                        #         title = tr('piaEncryptedDataCorruptKeyInfoTitle'),
+                                                        #         content = tr('piaEncryptedDataCorruptKeyInfoMsg'))
                                                 }
                                                 keyList()
                                                 rv$v <- rv$v + 1

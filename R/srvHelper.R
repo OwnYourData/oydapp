@@ -200,7 +200,7 @@ encryptedKeyInfo <- function(keyInfo){
         }
 }
 
-validKeyInfo <- function(keyInfo){
+validKeyInfo <- function(keyInfo, app, appRepoDefault){
         inputJSON <- tryCatch(
                 as.data.frame(jsonlite::fromJSON(keyInfo)),
                 error = function(e) { return(data.frame()) })
@@ -208,7 +208,14 @@ validKeyInfo <- function(keyInfo){
                 FALSE
         } else {
                 if(all(c('title', 'repo', 'key', 'read') %in% colnames(inputJSON))){
-                        TRUE
+                        privateKey <- as.character(inputJSON[1,'key'])
+                        privateKeyRaw <- sodium::sha256(charToRaw(privateKey))
+                        if(checkValidKey(app, appRepoDefault, privateKeyRaw)){
+                                TRUE
+                        } else {
+                                FALSE
+                        }
+
                 } else {
                         FALSE
                 }
