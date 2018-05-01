@@ -2,7 +2,7 @@
 # last update: 2018-01-07
 
 oydLog <- function(msg)
-        cat(paste(Sys.time(), msg, "\n"))
+        cat(file=stderr(), paste(Sys.time(), msg, "\n"))
 # oydLog(capture.output(pryr::where("variable")))
 
 # Low-level functions to access PIA =======================

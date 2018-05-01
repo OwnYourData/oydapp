@@ -711,8 +711,6 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
         })
 
         observeEvent(input$decryptBtn, {
-                oydLog("in input$decryptBtn")
-                cat(file=stderr(), "- in input$decryptBtn\n")
                 keyStr <- input$masterKey
                 app <- setupApp(session$userData$piaUrl,
                                 session$userData$appKey,
@@ -730,10 +728,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                         if (input$rememberPassword){
                                 store_keys <- as.character(jsonlite::toJSON(as.list(keyRecord[1,]), auto_unbox = TRUE))
                                 oyd_secret <- Sys.getenv("OYD_SECRET")
-                                oydLog(paste("oyd_secret: ", oyd_secret))
-                                cat(file=stderr(), "- oyd_secret: ", oyd_secret, "\n")
                                 if (nchar(oyd_secret) > 0){
-                                        oydLog("we have a secret")
                                         privateKey <- sodium::sha256(charToRaw(oyd_secret))
                                         publicKey  <- sodium::pubkey(privateKey)
                                         authKey <- sodium::sha256(charToRaw('auth'))
@@ -750,7 +745,6 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                                 jsonlite::toJSON(list(
                                                 value=cipher, nonce=nonce),
                                                 auto_unbox = TRUE))
-                                        oydLog(paste("sk:", store_keys))
                                 }
                                 shinyStore::updateStore(session, "oyd_keys",
                                                         store_keys)
