@@ -48,7 +48,7 @@ getToken <- function(pia_url, app_key, app_secret) {
 }
 
 getPluginId <- function(app){
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         plugins_url <- paste0(app$url, '/api/plugins/index')
         header <- RCurl::basicHeaderGatherer()
         response <- tryCatch(
@@ -70,7 +70,7 @@ getPluginId <- function(app){
 
 # public key for encrypted repos or '' if unencrypted
 getRepoPubKey <- function(app, repo){
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         url_data <- paste0(app$url, '/api/repos/', repo, '/pub_key')
         header <- RCurl::basicHeaderGatherer()
         doc <- tryCatch(
@@ -92,7 +92,7 @@ getRepoPubKey <- function(app, repo){
 
 # private key for encryption
 getPrivatekey <- function(app, pwd){
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         user_url <- paste0(app$url, '/api/users/current')
         header <- RCurl::basicHeaderGatherer()
         doc <- tryCatch(
@@ -258,7 +258,7 @@ oydDecrypt <- function(app, repo_url, data){
 # read raw data from PIA
 readRawItems <- function(app, repo_url) {
         page_size = 2000
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         url_data <- paste0(repo_url, '?size=', page_size)
         header <- RCurl::basicHeaderGatherer()
         doc <- tryCatch(
@@ -402,7 +402,7 @@ writeOydItem <- function(app, repo_url, item, id, addFields = list()){
 
 # write data into PIA
 writeItem <- function(app, repo_url, item) {
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         data <- jsonlite::toJSON(item, auto_unbox = TRUE)
         response <- tryCatch(
                 httr::POST(repo_url,
@@ -429,7 +429,7 @@ writeItem <- function(app, repo_url, item) {
 
 # update record in PIA
 updateItem <- function(app, repo_url, item, id) {
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         data <- jsonlite::toJSON(item, auto_unbox = TRUE)
         url <- paste0(repo_url, '/', id)
         response <- tryCatch(
@@ -460,7 +460,7 @@ updateItem <- function(app, repo_url, item, id) {
 }
 
 createTask <- function(app, identifier, command, schedule){
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         task_url <- paste0(app$url, '/api/tasks/create')
         item <- list(identifier = identifier,
                      command    = jsonlite::base64_enc(command),
@@ -479,7 +479,7 @@ createTask <- function(app, identifier, command, schedule){
 
 # delete data in PIA
 deleteItem <- function(app, repo_url, id){
-        headers <- defaultHeaders(app$token)
+        headers <- oydapp::defaultHeaders(app$token)
         item_url <- paste0(repo_url, '/', id)
         response <- tryCatch(
                 httr::DELETE(item_url,

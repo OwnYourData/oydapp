@@ -1,5 +1,5 @@
 {
-    "path" : "~/oyd/views/app-report",
+    "path" : "~/oyd/base/oydapp",
     "sortOrder" : [
         {
             "ascending" : true,
