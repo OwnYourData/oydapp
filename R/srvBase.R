@@ -194,7 +194,7 @@ oydDecrypt <- function(app, repo_url, data){
                         errorMsg <- 'msgMissingKey'
                 }
         } else {
-                if(anyNA(data$nonce)){
+                if(is.null(data$nonce) || anyNA(data$nonce)){
                         data$json <- as.character(data$value)
                         warningMsg <- 'msgUnencryptedDataWithKey'
                 } else {

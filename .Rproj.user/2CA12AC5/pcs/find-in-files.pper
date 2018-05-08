@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "getPrivateKey",
+        "query" : "getReadKey",
         "regex" : false
     }
 }
