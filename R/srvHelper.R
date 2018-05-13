@@ -85,7 +85,7 @@ getKey <- function(crypt, repo){
         if(!is.null(crypt)) {
                 if(class(crypt) == 'data.frame'){
                         if(nrow(crypt) > 0){
-                                crypt$n <- unlist(lapply(crypt$repo,
+                                crypt$n <- unlist(lapply(as.character(crypt$repo),
                                                          nchar))
                                 crypt <- crypt[with(crypt,
                                                     order(-n, repo)), ]
@@ -127,7 +127,12 @@ getReadKey <- function(crypt, repo){
                                    crypt$read == TRUE, ]
                 retValRead <- getKey(cryptRead, repo)
                 if(retValWrite$key == retValRead$key){
-                        str2raw(retValRead$key)
+                        if(nchar(as.character(retValRead$key)) != 32){
+                                sodium::sha256(charToRaw(as.character(
+                                        retValRead$key)))
+                        } else {
+                                str2raw(retValRead$key)
+                        }
                 } else {
                         NA
                 }

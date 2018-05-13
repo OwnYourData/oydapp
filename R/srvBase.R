@@ -271,7 +271,7 @@ readRawItems <- function(app, repo_url) {
         if(!is.na(doc)){
                 if(header$value()[['status']] == '200'){
                         recs <- tryCatch(
-                                as.integer(header$value()[['X-Total-Count']]),
+                                as.integer(header$value()[['Total-Count']]),
                                 error = function(e) { return(0) })
                         if(recs > page_size) {
                                 page_count <- floor(recs/page_size)
