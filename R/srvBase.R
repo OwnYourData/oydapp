@@ -248,6 +248,9 @@ oydDecrypt <- function(app, repo_url, data){
                         retVal$id <- data$id
                         retVal$created_at <- data$created_at
                         retVal <- retVal[retVal$timestamp != "NULL", ]
+                        retVal <- as.data.frame(t(do.call(rbind.data.frame,
+                                lapply(retVal, function(x) {t(unlist(x))}))),
+                                row.names = "")
                 }
         }
         if(nchar(errorMsg) > 0){
