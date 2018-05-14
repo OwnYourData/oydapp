@@ -127,7 +127,7 @@ getReadKey <- function(crypt, repo){
                                    crypt$read == TRUE, ]
                 retValRead <- getKey(cryptRead, repo)
                 if(retValWrite$key == retValRead$key){
-                        if(nchar(as.character(retValRead$key)) != 32){
+                        if(nchar(as.character(retValRead$key)) != 64){
                                 sodium::sha256(charToRaw(as.character(
                                         retValRead$key)))
                         } else {

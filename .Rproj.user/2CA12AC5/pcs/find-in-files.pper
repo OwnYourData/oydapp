@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "sodium::sha256",
+        "query" : "cat(",
         "regex" : false
     }
 }

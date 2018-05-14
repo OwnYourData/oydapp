@@ -235,7 +235,10 @@ oydDecrypt <- function(app, repo_url, data){
                 retVal <- tryCatch(
                         do.call(rbind.data.frame,
                                 lapply(lapply(data$json, jsonlite::fromJSON),
-                                       function(x) t(unlist(x)))),
+                                       function(x) t(x))),
+                        # do.call(rbind.data.frame,
+                        #         lapply(lapply(data$json, jsonlite::fromJSON),
+                        #                function(x) t(unlist(x)))),
                         error = function(e) {
                                 parseError <<- TRUE
                                 return(data.frame()) })
@@ -244,6 +247,7 @@ oydDecrypt <- function(app, repo_url, data){
                 } else {
                         retVal$id <- data$id
                         retVal$created_at <- data$created_at
+                        retVal <- retVal[retVal$timestamp != "NULL", ]
                 }
         }
         if(nchar(errorMsg) > 0){
