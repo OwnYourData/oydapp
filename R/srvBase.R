@@ -203,9 +203,9 @@ oydDecrypt <- function(app, repo_url, data){
                         decryptError <- FALSE
                         data$json <- tryCatch(
                                 apply(data, 1, function(x) {
-                                        cipher <- str2raw(as.character(
+                                        cipher <- oydapp::str2raw(as.character(
                                                 x['value']))
-                                        nonce <- str2raw(as.character(
+                                        nonce <- oydapp::str2raw(as.character(
                                                 x['nonce']))
                                         tryCatch(
                                                 rawToChar(sodium::auth_decrypt(
@@ -245,12 +245,14 @@ oydDecrypt <- function(app, repo_url, data){
                 if(parseError){
                         errorMsg <- 'msgCantParseJSON'
                 } else {
-                        retVal$id <- data$id
-                        retVal$created_at <- data$created_at
-                        retVal <- retVal[retVal$timestamp != "NULL", ]
+                        #retVal <- retVal[retVal$timestamp != "NULL", ]
+                        cn <- colnames(retVal)
                         retVal <- as.data.frame(t(do.call(rbind.data.frame,
                                 lapply(retVal, function(x) {unlist(x)}))),
                                 row.names = "")
+                        colnames(retVal) <- cn
+                        retVal$id <- data$id
+                        retVal$created_at <- data$created_at
                 }
         }
         if(nchar(errorMsg) > 0){
