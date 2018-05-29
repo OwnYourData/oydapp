@@ -1,5 +1,5 @@
 {
-    "path" : "~/oyd/views/app-answers",
+    "path" : "~/oyd/base/oydapp",
     "sortOrder" : [
         {
             "ascending" : true,

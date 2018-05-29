@@ -5,6 +5,6 @@ build-last-outputs="[{\"output\":\"==> R CMD INSTALL --no-multiarch --with-keep.
 compile_pdf_state="{\"errors\":[],\"output\":\"\",\"running\":false,\"tab_visible\":false,\"target_file\":\"\"}"
 console_procs="[]"
 files.monitored-path=""
-find-in-files-state="{\"handle\":\"03858a64173b42609bdb2dcc9af7daf7\",\"input\":\"cat(\",\"path\":\"~/oyd/base/oydapp\",\"regex\":false,\"results\":{\"file\":[\"~/oyd/base/oydapp/R/srvBase.R\"],\"line\":[5],\"lineValue\":[\"cat(file=stderr(), paste(Sys.time(), msg, \\\"\\\\n\\\"))\"],\"matchOff\":[[4]],\"matchOn\":[[0]]},\"running\":false}"
+find-in-files-state="{\"handle\":\"2c1b6b9ed2a7447dbf8000746df10d11\",\"input\":\"cat(\",\"path\":\"~/oyd/base/oydapp\",\"regex\":false,\"results\":{\"file\":[\"~/oyd/base/oydapp/R/srvBase.R\"],\"line\":[5],\"lineValue\":[\"cat(file=stderr(), paste(Sys.time(), msg, \\\"\\\\n\\\"))\"],\"matchOff\":[[4]],\"matchOn\":[[0]]},\"running\":false}"
 imageDirtyState="1"
 saveActionState="0"
