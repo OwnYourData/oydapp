@@ -4,7 +4,7 @@
         "filePatterns" : [
         ],
         "path" : "~/oyd/base/oydapp",
-        "query" : "cat(",
+        "query" : "my_apps",
         "regex" : false
     }
 }

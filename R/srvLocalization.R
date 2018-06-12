@@ -65,6 +65,29 @@ srvLocalization <- function(input, output, session) {
                 }
         })
 
+        output$hdrPiaLinkImg <- renderUI({
+                if (session$userData$desktop == "1"){
+                        if(!is.null(session$userData$piaUrl) &&
+                           nzchar(session$userData$piaUrl)){
+                                tags$div(
+                                        tags$a(href=session$userData$piaUrl,
+                                               style='color:#777; text-decoration: none;',
+                                               icon('arrow-left')),
+                                        tags$a(href=session$userData$piaUrl,
+                                               style='color:#777; text-decoration: none;',
+                                               tr('ctrlTrnsl_appTitle')),
+                                        style='display: inline;'
+                                )
+                        } else {
+                                tags$img(src='img/oydapp.png',
+                                         style='width: 40px;')
+                        }
+                } else {
+                        tags$img(src='img/oydapp.png',
+                                 style='width: 40px;')
+                }
+        })
+
         output$analysisBtn <- renderUI({
                 ns <- session$ns
                 tags$button(id=ns('buttonAnalysis'), type='button',

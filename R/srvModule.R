@@ -53,6 +53,11 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                         urlParams[['APP_SECRET']]
                                 urlParamExist <- TRUE
                         }
+                        session$userData$desktop <- "0"
+                        if(!is.null(urlParams[['desktop']])){
+                                session$userData$desktop <-
+                                        urlParams[['desktop']]
+                        }
                         if(urlParamExist){
                                 if(is.null(input$store$pia_url) |
                                    is.null(input$store$app_key) |

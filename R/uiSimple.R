@@ -52,11 +52,13 @@ uiSimple <- function(id){
                         id=ns('mainPage'),
                         title=paste0(appTitle, ' | OwnYourData'),
                         titlePanel(fluidRow(column(1),column(10,
-                                span(tags$img(src='img/oydapp.png', style='width: 40px;'),
-                                   span(
-                                           actionLink(ns('uiSimpleShowConfig'),
-                                                      '', icon = icon("cog")),
-                                           style="float:right;"))))),
+                                span(
+                                        uiOutput(ns('hdrPiaLinkImg'),
+                                                 inline=TRUE),
+                                        span(actionLink(
+                                                ns('uiSimpleShowConfig'),
+                                                '', icon = icon("cog")),
+                                             style="float:right;"))))),
                         fluidRow(column(1),
                                  column(10,shinyBS::bsAlert('piaStatus'))),
                         uiBody(ns),
