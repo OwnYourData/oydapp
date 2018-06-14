@@ -107,8 +107,12 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 session$sendCustomMessage(
                                         type='setPiaUrl',
                                         session$userData$piaUrl)
-                                url <- itemsUrl(app$url, appRepoDefault)
-                                retVal <- readRawItems(app, url)
+                                if(appRepoDefault == ""){
+                                        retVal <- data.frame()
+                                } else {
+                                        url <- itemsUrl(app$url, appRepoDefault)
+                                        retVal <- readRawItems(app, url)
+                                }
 
                                 # key management
                                 # check if keyInfo is available in local storage

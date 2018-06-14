@@ -179,7 +179,7 @@ r2d <- function(response){
         }
 }
 
-oydDecrypt <- function(app, repo_url, data){
+oydDecrypt <- function(app, repo_url, data, show_progress = FALSE){
         privateKey <- getReadKey(app$encryption,
                                  repoFromUrl(repo_url))
         errorMsg <- ''
@@ -201,25 +201,52 @@ oydDecrypt <- function(app, repo_url, data){
                         authKey <- sodium::pubkey(
                                 sodium::sha256(charToRaw('auth')))
                         decryptError <- FALSE
-                        data$json <- tryCatch(
-                                apply(data, 1, function(x) {
-                                        cipher <- oydapp::str2raw(as.character(
-                                                x['value']))
-                                        nonce <- oydapp::str2raw(as.character(
-                                                x['nonce']))
-                                        tryCatch(
-                                                rawToChar(sodium::auth_decrypt(
-                                                        cipher,
-                                                        privateKey,
-                                                        authKey,
-                                                        nonce)),
-                                                error = function(e) {
-                                                        return('oyd_error')
-                                                })
-                                }),
-                                error = function(e) {
-                                        decryptError <<- TRUE
-                                        return(NA) })
+                        if (show_progress) {
+                                item_count <- nrow(data)
+                                shiny::withProgress(
+                                        value = 0, message = 'decrypt data', {
+                                                data$json <- tryCatch(
+                                                        apply(data, 1, function(x) {
+                                                                shiny::incProgress(1/item_count)
+                                                                cipher <- oydapp::str2raw(as.character(
+                                                                        x['value']))
+                                                                nonce <- oydapp::str2raw(as.character(
+                                                                        x['nonce']))
+                                                                tryCatch(
+                                                                        rawToChar(sodium::auth_decrypt(
+                                                                                cipher,
+                                                                                privateKey,
+                                                                                authKey,
+                                                                                nonce)),
+                                                                        error = function(e) {
+                                                                                return('oyd_error')
+                                                                        })
+                                                        }),
+                                                        error = function(e) {
+                                                                decryptError <<- TRUE
+                                                                return(NA) })
+                                        })
+                        } else {
+                                data$json <- tryCatch(
+                                        apply(data, 1, function(x) {
+                                                cipher <- oydapp::str2raw(as.character(
+                                                        x['value']))
+                                                nonce <- oydapp::str2raw(as.character(
+                                                        x['nonce']))
+                                                tryCatch(
+                                                        rawToChar(sodium::auth_decrypt(
+                                                                cipher,
+                                                                privateKey,
+                                                                authKey,
+                                                                nonce)),
+                                                        error = function(e) {
+                                                                return('oyd_error')
+                                                        })
+                                        }),
+                                        error = function(e) {
+                                                decryptError <<- TRUE
+                                                return(NA) })
+                        }
                         data <- tryCatch(
                                 data[data$json != 'oyd_error', ],
                                 error = function(e) {
@@ -272,7 +299,7 @@ oydDecrypt <- function(app, repo_url, data){
 }
 
 # read raw data from PIA
-readRawItems <- function(app, repo_url) {
+readRawItems <- function(app, repo_url, show_progress=FALSE) {
         page_size = 2000
         headers <- oydapp::defaultHeaders(app$token)
         url_data <- paste0(repo_url, '?size=', page_size)
@@ -291,27 +318,51 @@ readRawItems <- function(app, repo_url) {
                                 error = function(e) { return(0) })
                         if(recs > page_size) {
                                 page_count <- floor(recs/page_size)
-#                                shiny::withProgress(
-#                                        value = 0, {
-                                                for(page in 1:(page_count+1)){
-                                                        url_data <- paste0(
-                                                                repo_url,
-                                                                '?page=', page,
-                                                                '&size=', page_size)
-                                                        response <- tryCatch(
-                                                                RCurl::getURL(
-                                                                        url_data,
-                                                                        .opts=list(httpheader=headers)),
-                                                                error=function(e){ return(NA) })
-                                                        subData <- r2d(response)
-                                                        if(nrow(respData)>0){
-                                                                respData <- data.table::rbindlist(list(respData, subData), fill=TRUE)
-                                                        } else {
-                                                                respData <- subData
-                                                        }
-#                                                        shiny::incProgress(1/page_count)
+                                if (show_progress){
+                                    shiny::withProgress(
+                                    value = 0, message = 'load data', {
+                                        for(page in 1:(page_count+1)){
+                                                url_data <- paste0(
+                                                        repo_url,
+                                                        '?page=', page,
+                                                        '&size=', page_size)
+                                                response <- tryCatch(
+                                                        RCurl::getURL(
+                                                                url_data,
+                                                                .opts=list(httpheader=headers)),
+                                                        error=function(e){ return(NA) })
+                                                subData <- r2d(response)
+                                                if(nrow(respData)>0){
+                                                        respData <- data.table::rbindlist(list(respData, subData), fill=TRUE)
+                                                } else {
+                                                        respData <- subData
                                                 }
-#                                })
+                                                shiny::incProgress(1/page_count)
+                                        }
+                                    })
+                                } else {
+                                        #                                shiny::withProgress(
+                                        #                                        value = 0, {
+                                        for(page in 1:(page_count+1)){
+                                                url_data <- paste0(
+                                                        repo_url,
+                                                        '?page=', page,
+                                                        '&size=', page_size)
+                                                response <- tryCatch(
+                                                        RCurl::getURL(
+                                                                url_data,
+                                                                .opts=list(httpheader=headers)),
+                                                        error=function(e){ return(NA) })
+                                                subData <- r2d(response)
+                                                if(nrow(respData)>0){
+                                                        respData <- data.table::rbindlist(list(respData, subData), fill=TRUE)
+                                                } else {
+                                                        respData <- subData
+                                                }
+                                                #                                                        shiny::incProgress(1/page_count)
+                                        }
+                                        #                                })
+                                }
                         } else {
                                 response <- tryCatch(
                                         RCurl::getURL(
@@ -339,19 +390,19 @@ readRawItems <- function(app, repo_url) {
 }
 
 # read data from PIA and decrypt if possible
-readItems <- function(app, repo_url) {
+readItems <- function(app, repo_url, show_progress=FALSE) {
         if (length(app) == 0) {
                 data.frame()
                 return()
         }
-        respData <- readRawItems(app, repo_url)
+        respData <- readRawItems(app, repo_url, show_progress)
         if(nrow(respData) > 0){
                 if('version' %in% colnames(respData)){
                         if(is.na(respData[1, 'version'])){
                                 data.frame()
                         } else {
                                 if(respData[1, 'version'] == oydDataVersion){
-                                        oydDecrypt(app, repo_url, respData)
+                                        oydDecrypt(app, repo_url, respData, show_progress)
                                 } else {
                                         respData
                                 }
