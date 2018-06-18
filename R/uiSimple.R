@@ -51,14 +51,16 @@ uiSimple <- function(id){
                 fluidPage(
                         id=ns('mainPage'),
                         title=paste0(appTitle, ' | OwnYourData'),
-                        titlePanel(fluidRow(column(1),column(10,
-                                span(
-                                        uiOutput(ns('hdrPiaLinkImg'),
-                                                 inline=TRUE),
-                                        span(actionLink(
-                                                ns('uiSimpleShowConfig'),
-                                                '', icon = icon("cog")),
-                                             style="float:right;"))))),
+                        titlePanel(fluidRow(
+                                column(1),
+                                column(1, uiOutput(ns('hdrPiaLinkImg'),
+                                                   inline=TRUE)),
+                                column(8, uiOutput(ns('hdrTitle'),
+                                                   inline=TRUE)),
+                                column(1, span(actionLink(
+                                        ns('uiSimpleShowConfig'),
+                                        '', icon = icon("cog")),
+                                        style="float:right;")))),
                         fluidRow(column(1),
                                  column(10,shinyBS::bsAlert('piaStatus'))),
                         uiBody(ns),

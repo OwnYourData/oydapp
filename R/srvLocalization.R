@@ -73,9 +73,6 @@ srvLocalization <- function(input, output, session) {
                                         tags$a(href=session$userData$piaUrl,
                                                style='color:#777; text-decoration: none;',
                                                icon('arrow-left')),
-                                        tags$a(href=session$userData$piaUrl,
-                                               style='color:#777; text-decoration: none;',
-                                               tr('ctrlTrnsl_appTitle')),
                                         style='display: inline;'
                                 )
                         } else {
@@ -85,6 +82,16 @@ srvLocalization <- function(input, output, session) {
                 } else {
                         tags$img(src='img/oydapp.png',
                                  style='width: 40px;')
+                }
+        })
+
+        output$hdrTitle <- renderUI({
+                if (session$userData$desktop == "1"){
+                        tags$div(tr('ctrlTrnsl_appTitle'),
+                                 style="color:#777;
+                                        text-align: center;")
+                } else {
+                        tags$div()
                 }
         })
 
