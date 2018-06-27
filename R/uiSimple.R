@@ -52,15 +52,22 @@ uiSimple <- function(id){
                         id=ns('mainPage'),
                         title=paste0(appTitle, ' | OwnYourData'),
                         titlePanel(fluidRow(
-                                column(1),
-                                column(1, uiOutput(ns('hdrPiaLinkImg'),
-                                                   inline=TRUE)),
-                                column(8, uiOutput(ns('hdrTitle'),
-                                                   inline=TRUE)),
-                                column(1, span(actionLink(
-                                        ns('uiSimpleShowConfig'),
-                                        '', icon = icon("cog")),
-                                        style="float:right;")))),
+                                tags$div(" ", class="col-xs-1"),
+                                tags$div(
+                                        uiOutput(ns('hdrPiaLinkImg'),
+                                                 inline=TRUE),
+                                        class="col-xs-1"),
+                                tags$div(
+                                        uiOutput(ns('hdrTitle'),
+                                                 inline=TRUE),
+                                        class="col-xs-8"),
+                                tags$div(
+                                        span(actionLink(
+                                                ns('uiSimpleShowConfig'),
+                                                '', icon = icon("cog")),
+                                             style="float:right;"),
+                                        class="col-xs-1")
+                        )),
                         fluidRow(column(1),
                                  column(10,shinyBS::bsAlert('piaStatus'))),
                         uiBody(ns),
