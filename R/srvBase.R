@@ -401,6 +401,9 @@ readItems <- function(app, repo_url, show_progress=FALSE) {
                         if(is.na(respData[1, 'version'])){
                                 data.frame()
                         } else {
+                                if(!exists("oydDataVersion")){
+                                        oydDataVersion <- "0.4"
+                                }
                                 if(respData[1, 'version'] == oydDataVersion){
                                         oydDecrypt(app, repo_url, respData, show_progress)
                                 } else {
