@@ -3,7 +3,8 @@
         "caseSensitive" : false,
         "filePatterns" : [
         ],
-        "path" : "~/oyd/base/oydapp",
+        "path" : "",
+        "projectRelative" : true,
         "query" : "cat(",
         "regex" : false
     }
