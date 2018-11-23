@@ -228,7 +228,7 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                 if(length(keyRecord) == 0){
                                         keyInfo <- input$store$oyd_keys
                                 } else {
-                                        keyInfo <- jsonlite::toJSON(keyRecord)
+                                        keyInfo <- store_keys
                                 }
                                 if(is.null(keyInfo)){
                                         keyInfo <- ''
