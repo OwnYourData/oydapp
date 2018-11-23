@@ -83,7 +83,9 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                         cipher <- doc_parsed$cipher
                                         nonce <- session$userData$nonce
                                         key <- session$userData$masterKey
-                                        if(!(is.null(key) || (nchar(key) == 0))){
+                                        if((!(is.null(cipher) || (nchar(cipher) == 0))) &&
+                                           (!(is.null(nonce) || (nchar(nonce) == 0))) &&
+                                           (!(is.null(key) || (nchar(key) == 0)))){
                                                 cipher_raw <- as.raw(strtoi(sapply(seq(1, nchar(cipher), by=2),
                                                                                    function(x) substr(cipher, x, x+1)), 16L))
                                                 nonce_raw <- as.raw(strtoi(sapply(seq(1, nchar(nonce), by=2),
