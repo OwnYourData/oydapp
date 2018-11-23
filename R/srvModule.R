@@ -83,88 +83,86 @@ srvModule <- function(input, output, session, tr, notify, appStart) {
                                         cipher <- doc_parsed$cipher
                                         nonce <- session$userData$nonce
                                         key <- session$userData$masterKey
-                                        cipher_raw <- as.raw(strtoi(sapply(seq(1, nchar(cipher), by=2),
-                                                                           function(x) substr(cipher, x, x+1)), 16L))
-                                        nonce_raw <- as.raw(strtoi(sapply(seq(1, nchar(nonce), by=2),
-                                                                          function(x) substr(nonce, x, x+1)), 16L))
-                                        key_raw <- as.raw(strtoi(sapply(seq(1, nchar(key), by=2),
-                                                                        function(x) substr(key, x, x+1)), 16L))
-                                        public_authentication_key_raw <- sodium::pubkey(sodium::sha256(charToRaw('auth')))
+                                        if(!(is.null(key) || (nchar(key) > 0))){
+                                                cipher_raw <- as.raw(strtoi(sapply(seq(1, nchar(cipher), by=2),
+                                                                                   function(x) substr(cipher, x, x+1)), 16L))
+                                                nonce_raw <- as.raw(strtoi(sapply(seq(1, nchar(nonce), by=2),
+                                                                                  function(x) substr(nonce, x, x+1)), 16L))
+                                                key_raw <- as.raw(strtoi(sapply(seq(1, nchar(key), by=2),
+                                                                                function(x) substr(key, x, x+1)), 16L))
+                                                public_authentication_key_raw <- sodium::pubkey(sodium::sha256(charToRaw('auth')))
+                                                message <- tryCatch(rawToChar(sodium::auth_decrypt(cipher_raw,
+                                                                                          key_raw,
+                                                                                          public_authentication_key_raw,
+                                                                                          nonce_raw)),
+                                                                    error = function(e) { return("") })
+                                                user_login_url <- paste0(session$userData$piaUrl, '/oauth/token')
+                                                optTimeout <- RCurl::curlOptions(connecttimeout = 10)
+                                                response <- tryCatch(
+                                                        RCurl::postForm(user_login_url,
+                                                                        email      = doc_parsed$email,
+                                                                        password   = message,
+                                                                        grant_type = 'password',
+                                                                        .opts      = optTimeout),
+                                                        error = function(e) { return(NA) })
+                                                if (!is.na(response)) {
+                                                        if(jsonlite::validate(response[1])){
+                                                                token <- jsonlite::fromJSON(response[1])$access_token
+                                                                pia_url <- session$userData$piaUrl
+                                                                headers <- oydapp::defaultHeaders(token)
+                                                                plugin_info_url <- paste0(pia_url, '/api/plugins/identifier/', plugin_identifier)
+                                                                header <- RCurl::basicHeaderGatherer()
+                                                                response <- tryCatch(
+                                                                        RCurl::getURI(plugin_info_url,
+                                                                                      .opts=list(httpheader = headers),
+                                                                                      headerfunction = header$update),
+                                                                        error = function(e) { return(NA) })
+                                                                if(!is.na(response)){
+                                                                        if(header$value()[['status']] == '200'){
+                                                                                app_key <- jsonlite::fromJSON(response[1])$uid
+                                                                                app_secret <- jsonlite::fromJSON(response[1])$secret
+                                                                                urlParams[['APP_KEY']] <- app_key
+                                                                                session$userData$appKey <- app_key
+                                                                                urlParams[['APP_SECRET']] <- app_secret
+                                                                                session$userData$appSecret <- app_secret
 
-                                        message <- tryCatch(rawToChar(sodium::auth_decrypt(cipher_raw,
-                                                                                  key_raw,
-                                                                                  public_authentication_key_raw,
-                                                                                  nonce_raw)),
-                                                            error = function(e) { return("") })
-
-                                        user_login_url <- paste0(session$userData$piaUrl, '/oauth/token')
-                                        optTimeout <- RCurl::curlOptions(connecttimeout = 10)
-                                        response <- tryCatch(
-                                                RCurl::postForm(user_login_url,
-                                                                email      = doc_parsed$email,
-                                                                password   = message,
-                                                                grant_type = 'password',
-                                                                .opts      = optTimeout),
-                                                error = function(e) { return(NA) })
-                                        if (!is.na(response)) {
-                                                if(jsonlite::validate(response[1])){
-                                                        token <- jsonlite::fromJSON(response[1])$access_token
-                                                        pia_url <- session$userData$piaUrl
-                                                        headers <- oydapp::defaultHeaders(token)
-                                                        plugin_info_url <- paste0(pia_url, '/api/plugins/identifier/', plugin_identifier)
-                                                        header <- RCurl::basicHeaderGatherer()
-                                                        response <- tryCatch(
-                                                                RCurl::getURI(plugin_info_url,
-                                                                              .opts=list(httpheader = headers),
-                                                                              headerfunction = header$update),
-                                                                error = function(e) { return(NA) })
-                                                        if(!is.na(response)){
-                                                                if(header$value()[['status']] == '200'){
-                                                                        app_key <- jsonlite::fromJSON(response[1])$uid
-                                                                        app_secret <- jsonlite::fromJSON(response[1])$secret
-                                                                        urlParams[['APP_KEY']] <- app_key
-                                                                        session$userData$appKey <- app_key
-                                                                        urlParams[['APP_SECRET']] <- app_secret
-                                                                        session$userData$appSecret <- app_secret
-
-                                                                        app <- setupApp(pia_url, app_key, app_secret, NA)
-                                                                        privateKey <- getPrivatekey(app, message)
-                                                                        privateKeyRaw <- sodium::sha256(charToRaw(privateKey))
-                                                                        if(checkValidKey(app, appRepoDefault, privateKeyRaw)){
-                                                                                keyRecord <- data.frame(
-                                                                                        title = 'Datentresor',
-                                                                                        repo = 'oyd',
-                                                                                        key = privateKey,
-                                                                                        read = TRUE, stringsAsFactors = FALSE)
-                                                                                session$userData$keyItems <- keyRecord
-                                                                                store_keys <- as.character(jsonlite::toJSON(as.list(keyRecord[1,]), auto_unbox = TRUE))
-                                                                                oyd_secret <- Sys.getenv("OYD_SECRET")
-                                                                                if (nchar(oyd_secret) > 0){
-                                                                                        privateKey <- sodium::sha256(charToRaw(oyd_secret))
-                                                                                        publicKey  <- sodium::pubkey(privateKey)
-                                                                                        authKey <- sodium::sha256(charToRaw('auth'))
-                                                                                        nonce   <- sodium::random(24)
-                                                                                        cipher  <- sodium::auth_encrypt(charToRaw(store_keys),
-                                                                                                                        authKey,
-                                                                                                                        publicKey,
-                                                                                                                        nonce)
-                                                                                        cipher   <- paste0(as.hexmode(as.integer(cipher)),
-                                                                                                           collapse = '')
-                                                                                        nonce   <- paste0(as.hexmode(as.integer(nonce)),
-                                                                                                          collapse = '')
-                                                                                        store_keys <- as.character(
-                                                                                                jsonlite::toJSON(list(
-                                                                                                        value=cipher, nonce=nonce),
-                                                                                                        auto_unbox = TRUE))
+                                                                                app <- setupApp(pia_url, app_key, app_secret, NA)
+                                                                                privateKey <- getPrivatekey(app, message)
+                                                                                privateKeyRaw <- sodium::sha256(charToRaw(privateKey))
+                                                                                if(checkValidKey(app, appRepoDefault, privateKeyRaw)){
+                                                                                        keyRecord <- data.frame(
+                                                                                                title = 'Datentresor',
+                                                                                                repo = 'oyd',
+                                                                                                key = privateKey,
+                                                                                                read = TRUE, stringsAsFactors = FALSE)
+                                                                                        session$userData$keyItems <- keyRecord
+                                                                                        store_keys <- as.character(jsonlite::toJSON(as.list(keyRecord[1,]), auto_unbox = TRUE))
+                                                                                        oyd_secret <- Sys.getenv("OYD_SECRET")
+                                                                                        if (nchar(oyd_secret) > 0){
+                                                                                                privateKey <- sodium::sha256(charToRaw(oyd_secret))
+                                                                                                publicKey  <- sodium::pubkey(privateKey)
+                                                                                                authKey <- sodium::sha256(charToRaw('auth'))
+                                                                                                nonce   <- sodium::random(24)
+                                                                                                cipher  <- sodium::auth_encrypt(charToRaw(store_keys),
+                                                                                                                                authKey,
+                                                                                                                                publicKey,
+                                                                                                                                nonce)
+                                                                                                cipher   <- paste0(as.hexmode(as.integer(cipher)),
+                                                                                                                   collapse = '')
+                                                                                                nonce   <- paste0(as.hexmode(as.integer(nonce)),
+                                                                                                                  collapse = '')
+                                                                                                store_keys <- as.character(
+                                                                                                        jsonlite::toJSON(list(
+                                                                                                                value=cipher, nonce=nonce),
+                                                                                                                auto_unbox = TRUE))
+                                                                                        }
+                                                                                        shinyStore::updateStore(session, "oyd_keys", store_keys)
                                                                                 }
-                                                                                shinyStore::updateStore(session, "oyd_keys", store_keys)
                                                                         }
                                                                 }
                                                         }
                                                 }
                                         }
-
-
                                 }
                         }
                         if(urlParamExist){
