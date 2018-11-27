@@ -23,6 +23,15 @@ itemsUrl_lastN <- function(url, repo_name, lastN) {
         paste0(url, '/api/repos/', repo_name, '/items?last=', lastN)
 }
 
+# add parameter to URL
+addUrlParam <- function(url, param, value){
+        if(grepl('?', url, fixed = TRUE)){
+                paste0(url, '&', param, '=', value)
+        } else {
+                paste0(url, '?', param, '=', value)
+        }
+}
+
 # extract URL from repo URL
 repoFromUrl <- function(url) {
         sub(".*?/api/repos/(.*?)/items", "\\1", url, perl = TRUE)
@@ -305,9 +314,9 @@ oydDecrypt <- function(app, repo_url, data, show_progress = FALSE){
 
 # read raw data from PIA
 readRawItems <- function(app, repo_url, show_progress=FALSE) {
-        page_size = 2000
+        page_size <- 2000
         headers <- oydapp::defaultHeaders(app$token)
-        url_data <- paste0(repo_url, '?size=', page_size)
+        url_data <- oydapp::addUrlParam(repo_url, 'size', page_size)
         header <- RCurl::basicHeaderGatherer()
         doc <- tryCatch(
                 RCurl::getURI(url_data,
@@ -327,10 +336,8 @@ readRawItems <- function(app, repo_url, show_progress=FALSE) {
                                     shiny::withProgress(
                                     value = 0, message = 'load data', {
                                         for(page in 1:(page_count+1)){
-                                                url_data <- paste0(
-                                                        repo_url,
-                                                        '?page=', page,
-                                                        '&size=', page_size)
+                                                url_data <- addUrlParam(repo_url, 'page', page)
+                                                url_data <- addUrlParam(url_data, 'size', page_size)
                                                 response <- tryCatch(
                                                         RCurl::getURL(
                                                                 url_data,
@@ -349,10 +356,8 @@ readRawItems <- function(app, repo_url, show_progress=FALSE) {
                                         #                                shiny::withProgress(
                                         #                                        value = 0, {
                                         for(page in 1:(page_count+1)){
-                                                url_data <- paste0(
-                                                        repo_url,
-                                                        '?page=', page,
-                                                        '&size=', page_size)
+                                                url_data <- addUrlParam(repo_url, 'page', page)
+                                                url_data <- addUrlParam(url_data, 'size', page_size)
                                                 response <- tryCatch(
                                                         RCurl::getURL(
                                                                 url_data,
