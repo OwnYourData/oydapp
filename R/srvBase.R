@@ -19,7 +19,7 @@ itemsUrl <- function(url, repo_name) {
 }
 
 # URL to access last N items in a repo
-itemsUrl <- function(url, repo_name, lastN) {
+itemsUrl_lastN <- function(url, repo_name, lastN) {
         paste0(url, '/api/repos/', repo_name, '/items?last=', lastN)
 }
 
