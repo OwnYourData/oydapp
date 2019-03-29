@@ -1,5 +1,5 @@
 # <img src="https://github.com/OwnYourData/oydapp/raw/master/assets/service.png" width="92"> OwnYourData R Framework    
-Dieses R-Packet stellt die Infrastruktur zum Zugriff auf den OwnYourData Datentresor für (Shiny Apps)[https://shiny.rstudio.com] zur Verfügung.
+Dieses R-Packet stellt die Infrastruktur zum Zugriff auf den OwnYourData Datentresor für [Shiny Apps](https://shiny.rstudio.com) zur Verfügung.
 
 &nbsp;    
 
@@ -13,7 +13,7 @@ library(oydapp)
 
 ## Struktur einer OwnYourData Shiny App    
 
-Das Plugin (app-answers)[https://github.com/OwnYourData/app-answers] ist ein gutes Beispiel für die Entwicklung einer eigenen Shiny App. Die folgende Struktur und Vorgehensweise wird bei der Entwicklung empfohlen:
+Das Plugin [app-answers](https://github.com/OwnYourData/app-answers) ist ein gutes Beispiel für die Entwicklung einer eigenen Shiny App. Die folgende Struktur und Vorgehensweise wird bei der Entwicklung empfohlen:
 
 * `app.R`: enthält die Aufrufe des client- und serverseitigen Codes einer Shiny App    
 * `constants.R`: setzt allgemeine Attribute wie Name, Version, etc. und enthält die App-spezifischen Übersetzungen    
