@@ -330,6 +330,11 @@ readRawItems <- function(app, repo_url, show_progress=FALSE) {
                         recs <- tryCatch(
                                 as.integer(header$value()[['Total-Count']]),
                                 error = function(e) { return(0) })
+                        if(recs == 0){
+                                recs <- tryCatch(
+                                        as.integer(header$value()[['total-count']]),
+                                        error = function(e) { return(0) })
+                        }
                         if(recs > page_size) {
                                 page_count <- floor(recs/page_size)
                                 if (show_progress){
